@@ -1,0 +1,265 @@
+    /* ========================================
+       LAYOUT
+       ======================================== */
+    .app-container {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================================
+       UNIFIED HEADER WITH NAVIGATION
+       ======================================== */
+    .app-header {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-sm) var(--space-lg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      flex-wrap: nowrap;
+    }
+
+    .header-logo {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--color-success);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: white;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .status-badge.disconnected { background: var(--color-danger); }
+    .status-badge.connecting { background: var(--color-warning); }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot-header {
+      width: 6px; height: 6px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+    }
+
+    .status-dot-header.connected {
+      background: white;
+      animation: pulse 2s infinite;
+    }
+
+    .status-badge .loading-indicator {
+      border-color: rgba(255,255,255,0.3);
+      border-top-color: white;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .header-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      justify-content: flex-end;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: var(--space-md);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .header-temp {
+      color: var(--color-primary);
+    }
+
+    .header-humid {
+      color: var(--color-info);
+    }
+
+    .header-co2 {
+      color: var(--color-success);
+    }
+
+    .date-time {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .last-update {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+    }
+
+    /* ========================================
+       NAVIGATION TABS (in header - single line)
+       ======================================== */
+    .nav-primary {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      margin-left: var(--space-sm);
+      flex-wrap: nowrap;
+    }
+
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover {
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+
+    .nav-tab.active {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .nav-icon { font-size: 14px; }
+    .nav-label { font-size: 11px; }
+
+    [x-cloak] { display: none !important; }
+
+    /* ========================================
+       RESPONSIVE: Show icons only on smaller screens
+       ======================================== */
+    @media (max-width: 1100px) {
+      .nav-tab .nav-label {
+        display: none;
+      }
+      .nav-tab {
+        padding: 6px;
+      }
+      .nav-icon { font-size: 16px; }
+    }
+
+    /* ========================================
+       RESPONSIVE: Small screens (compact)
+       ======================================== */
+    @media (max-width: 600px) {
+      .app-header {
+        padding: var(--space-xs) var(--space-sm);
+      }
+      .header-content {
+        gap: var(--space-xs);
+      }
+      .header-logo {
+        font-size: 20px;
+      }
+      .nav-tab {
+        padding: 4px;
+      }
+      .nav-icon { font-size: 14px; }
+      .status-badge {
+        padding: 2px 6px;
+        font-size: 9px;
+      }
+      .date-time {
+        font-size: var(--font-size-xs);
+      }
+      .last-update {
+        display: none;
+      }
+    }
+
+    /* ========================================
+       MAIN CONTENT
+       ======================================== */
+    .app-main {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .view-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ========================================
+       FOOTER
+       ======================================== */
+    .app-footer {
+      padding: var(--space-md);
+      text-align: center;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+    }
+
+    .footer-status {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-text-tertiary);
+    }
+
+    .status-dot.connected {
+      background: var(--color-success);
+      box-shadow: 0 0 6px var(--color-success);
+    }
+
+    .status-dot.disconnected {
+      background: var(--color-danger);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
