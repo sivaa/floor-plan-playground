@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Zigbee Network Map v2</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/views/network.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="page-header" style="padding: 16px 0 8px;">
+      <h1 style="margin:0;font-size:28px;letter-spacing:-0.2px;">Zigbee Network Map v2</h1>
+      <p style="margin:6px 0 0;color:#4a4a4f;">Standalone view extracted from views/network.js</p>
+    </div>
+
+    <div class="network-view" x-data="networkView()" x-init="init()">
+      <div class="network-controls">
+        <button class="network-control-btn" :class="{ active: showSignalRange }"
+                @click="showSignalRange = !showSignalRange">
+          <span>📶</span> <span x-text="showSignalRange ? 'Hide Range' : 'Show Range'"></span>
+        </button>
+        <button class="network-control-btn" :class="{ active: showLabels }"
+                @click="showLabels = !showLabels">
+          <span>🏷️</span> <span x-text="showLabels ? 'Hide Labels' : 'Show Labels'"></span>
+        </button>
+        <button class="network-control-btn" :class="{ active: autoRotate }"
+                @click="toggleAutoRotate()">
+          <span>🔄</span> <span x-text="autoRotate ? 'Stop' : 'Rotate'"></span>
+        </button>
+        <button class="network-control-btn" :class="{ active: showWallNumbers }"
+                @click="toggleWallNumbers()">
+          <span>🔢</span> <span x-text="showWallNumbers ? 'Hide #' : 'Show #'"></span>
+        </button>
+        <button class="network-control-btn" @click="resetView()">🎯 Reset</button>
+        <div class="network-zoom-controls">
+          <button class="network-control-btn network-zoom-btn" @click="zoomOut()">➖</button>
+          <span class="network-zoom-indicator" x-text="getZoomPercent() + '%'"></span>
+          <button class="network-control-btn network-zoom-btn" @click="zoomIn()">➕</button>
+        </div>
+      </div>
+
+      <div class="network-container" x-ref="networkContainer"></div>
+
+      <div class="network-legend">
+        <div class="legend-item">
+          <div class="legend-badge coordinator">Z</div>
+          <span>Zigbee Coordinator</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-badge router">R</div>
+          <span>Zigbee Router</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-badge end-device">E</div>
+          <span>Zigbee End Device</span>
+        </div>
+      </div>
+
+      <div class="network-stats">
+        <div class="network-stat">
+          <span>📡</span>
+          <span x-text="deviceCount + ' devices'"></span>
+        </div>
+        <div class="network-stat">
+          <span>🔗</span>
+          <span x-text="routerCount + ' routers'"></span>
+        </div>
+        <div class="network-stat">
+          <span>📍</span>
+          <span x-text="endDeviceCount + ' end devices'"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import the network view from the modular structure
+    import { networkView } from './views/network.js';
+
+    // Register the view globally for Alpine.js BEFORE Alpine loads
+    window.networkView = networkView;
+
+    // Now load Alpine.js
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>

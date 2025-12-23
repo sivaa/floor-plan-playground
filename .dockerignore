@@ -1,0 +1,9 @@
+node_modules
+dist
+screenshots
+.git
+.gitignore
+*.md
+.vscode
+.idea
+tests

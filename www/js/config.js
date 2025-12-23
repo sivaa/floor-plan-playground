@@ -228,10 +228,10 @@ export const FLOOR_PLAN_CONFIG = {
   balcony: { x: 9.764, z: 7.065, width: 1.050, depth: 1.200, color: 0x93c5fd },
   hallway: { x: 3.839, z: 2.0, width: 1.5, depth: 2.5, color: 0x94a3b8 },
   balconyNotch: {
-    width: 1.0,    // Cut-out width
-    depth: 1.5,    // Cut-out depth (increased to make balcony bigger)
+    width: 1.0,
+    depth: 1.5,
     hasRailing: true,
-    floorColor: 0xC0C0C2  // Match base floor
+    floorColor: 0xC9B89A  // Warm beige (same as room floors)
   },
   doors: [
     { x: 9.239, z: 6.465, rotation: Math.PI/2, type: 'french', swingDirection: 'inward' },  // Balcony ↔ Living (double glass French doors at east wall)
