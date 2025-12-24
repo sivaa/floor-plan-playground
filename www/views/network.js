@@ -367,13 +367,13 @@ export function networkView() {
       const westHeaderStart = 0.6;    // Top of window openings (y=0.6 to 0.8)
       const westMiddleHeight = westHeaderStart - westSillHeight;  // 0.4
 
-      // W5 window (Bathroom) - centered at z=1.487
-      const w5CenterZ = 1.487;
-      const w5Left = w5CenterZ - w5Width / 2;   // 1.137
-      const w5Right = w5CenterZ + w5Width / 2;  // 1.837
+      // W5 window (Bathroom) - centered at z=1.2 (shifted north)
+      const w5CenterZ = 1.2;
+      const w5Left = w5CenterZ - w5Width / 2;   // 0.85
+      const w5Right = w5CenterZ + w5Width / 2;  // 1.55
 
-      // W4 window (Kitchen) - centered at z=3.218
-      const w4CenterZ = 3.218;
+      // W4 window (Kitchen) - centered at z=2.9 (shifted north)
+      const w4CenterZ = 2.9;
       const w4Left = w4CenterZ - w4Width / 2;   // 2.7805
       const w4Right = w4CenterZ + w4Width / 2;  // 3.6555
 
