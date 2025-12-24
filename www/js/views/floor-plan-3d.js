@@ -5,6 +5,7 @@
 
 import { interpolateColor, getRoomColor } from '../three/color-utils.js';
 import { applyDarkTheme, setWallsVisibility } from '../three/theme-utils.js';
+import { createScene, createRenderer, createOrbitCamera, addLighting, cleanupThreeState } from '../three/scene-init.js';
 
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const threeState = {
@@ -65,15 +66,7 @@ export function threeDView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS, Orbi
       }
 
       // Clean up any existing Three.js objects
-      if (threeState.renderer) {
-        threeState.renderer.dispose();
-      }
-      if (threeState.scene) {
-        threeState.scene.clear();
-      }
-      if (threeState.animationId) {
-        cancelAnimationFrame(threeState.animationId);
-      }
+      cleanupThreeState(threeState);
 
       this.initScene();
       this.initCamera(container, OrbitControls);
@@ -88,62 +81,24 @@ export function threeDView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS, Orbi
     },
 
     initScene() {
-      threeState.scene = new THREE.Scene();
-      threeState.scene.background = new THREE.Color(0xE8E8EA);
+      threeState.scene = createScene(0xE8E8EA);
     },
 
     initCamera(container, OrbitControls) {
-      const aspect = container.clientWidth / container.clientHeight;
-
-      // Use PerspectiveCamera for 3D viewing
-      threeState.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
-      // Default to top view - zoomed to fill screen, rotated 180° (scene is centered at 0,0,0)
-      threeState.camera.position.set(0, 14, -0.1);
-      threeState.camera.lookAt(0, 0, 0);
-
-      // Add OrbitControls for interactive camera
-      threeState.controls = new OrbitControls(threeState.camera, container);
-      threeState.controls.enableDamping = true;
-      threeState.controls.dampingFactor = 0.05;
-      threeState.controls.maxPolarAngle = Math.PI / 2.1;  // Prevent camera below floor
-      threeState.controls.minDistance = 5;
-      threeState.controls.maxDistance = 40;
-      threeState.controls.target.set(0, 0, 0);
-      threeState.controls.update();
+      const result = createOrbitCamera(container, OrbitControls, {
+        position: { x: 0, y: 14, z: -0.1 },
+        maxDistance: 40
+      });
+      threeState.camera = result.camera;
+      threeState.controls = result.controls;
     },
 
     initRenderer(container) {
-      threeState.renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true
-      });
-      threeState.renderer.setSize(container.clientWidth, container.clientHeight);
-      threeState.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      threeState.renderer.shadowMap.enabled = true;
-      threeState.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      container.appendChild(threeState.renderer.domElement);
+      threeState.renderer = createRenderer(container);
     },
 
     initLighting() {
-      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-      threeState.scene.add(ambient);
-
-      const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-      directional.position.set(15, 20, 15);
-      directional.castShadow = true;
-      directional.shadow.mapSize.width = 1024;
-      directional.shadow.mapSize.height = 1024;
-      directional.shadow.camera.near = 0.5;
-      directional.shadow.camera.far = 50;
-      directional.shadow.camera.left = -15;
-      directional.shadow.camera.right = 15;
-      directional.shadow.camera.top = 15;
-      directional.shadow.camera.bottom = -15;
-      threeState.scene.add(directional);
-
-      const fill = new THREE.DirectionalLight(0xffffff, 0.3);
-      fill.position.set(-10, 10, -10);
-      threeState.scene.add(fill);
+      addLighting(threeState.scene, { enableShadows: true });
     },
 
     buildFloorPlan() {

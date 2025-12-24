@@ -3,6 +3,8 @@
  * 3D drag-drop interface for placing sensors on the floor plan
  */
 
+import { createScene, createRenderer, createOrbitCamera, addLighting } from '../three/scene-init.js';
+
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const configThreeState = {
   scene: null,
@@ -95,49 +97,32 @@ export function sensorConfigView(FLOOR_PLAN_CONFIG, SENSOR_VISUALS, OrbitControl
     },
 
     initScene() {
-      configThreeState.scene = new THREE.Scene();
-      configThreeState.scene.background = new THREE.Color(0x1a1a2e);
+      configThreeState.scene = createScene(0x1a1a2e);
     },
 
     initCamera(container, OrbitControls) {
-      const aspect = container.clientWidth / container.clientHeight;
-      configThreeState.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
-      configThreeState.camera.position.set(0, 12, 8);
-      configThreeState.camera.lookAt(0, 0, 0);
-
-      configThreeState.controls = new OrbitControls(configThreeState.camera, container);
-      configThreeState.controls.enableDamping = true;
-      configThreeState.controls.dampingFactor = 0.05;
-      configThreeState.controls.maxPolarAngle = Math.PI / 2.1;
-      configThreeState.controls.minDistance = 5;
-      configThreeState.controls.maxDistance = 30;
-      configThreeState.controls.target.set(0, 0, 0);
-      configThreeState.controls.update();
+      const result = createOrbitCamera(container, OrbitControls, {
+        fov: 50,
+        position: { x: 0, y: 12, z: 8 },
+        minDistance: 5,
+        maxDistance: 30
+      });
+      configThreeState.camera = result.camera;
+      configThreeState.controls = result.controls;
     },
 
     initRenderer(container) {
-      configThreeState.renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true
-      });
-      configThreeState.renderer.setSize(container.clientWidth, container.clientHeight);
-      configThreeState.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      configThreeState.renderer.shadowMap.enabled = true;
-      container.appendChild(configThreeState.renderer.domElement);
+      configThreeState.renderer = createRenderer(container, false);
     },
 
     initLighting() {
-      const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-      configThreeState.scene.add(ambient);
-
-      const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-      directional.position.set(10, 20, 10);
-      directional.castShadow = true;
-      configThreeState.scene.add(directional);
-
-      const fill = new THREE.DirectionalLight(0xffffff, 0.3);
-      fill.position.set(-10, 10, -10);
-      configThreeState.scene.add(fill);
+      addLighting(configThreeState.scene, {
+        ambientIntensity: 0.5,
+        directionalIntensity: 0.8,
+        directionalPosition: { x: 10, y: 20, z: 10 },
+        enableShadows: true,
+        fillIntensity: 0.3
+      });
     },
 
     initRaycaster() {

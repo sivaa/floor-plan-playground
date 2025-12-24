@@ -7,6 +7,7 @@ import { ZIGBEE_DEVICES } from '../data/zigbee-devices.js';
 import { FLOOR_PLAN_CONFIG } from '../config.js';
 import { createNumberSprite } from '../three/sprite-factory.js';
 import { createRadiatorMaterial, createTrvzbBodyMaterial, createLedMaterial } from '../three/radiator-materials.js';
+import { createScene, createRenderer, createOrthographicCamera, addLighting, cleanupThreeState } from '../three/scene-init.js';
 
 // Persistent state across view switches
 const networkState = {
@@ -61,9 +62,7 @@ export function networkView() {
         return;
       }
 
-      if (networkState.renderer) networkState.renderer.dispose();
-      if (networkState.scene) networkState.scene.clear();
-      if (networkState.animationId) cancelAnimationFrame(networkState.animationId);
+      cleanupThreeState(networkState);
 
       this.initScene();
       this.initCamera(container);
@@ -81,41 +80,24 @@ export function networkView() {
     },
 
     initScene() {
-      networkState.scene = new THREE.Scene();
-      // Warm beige gradient background
-      networkState.scene.background = new THREE.Color(0xE8DFD4);
+      // Warm beige background
+      networkState.scene = createScene(0xE8DFD4);
     },
 
     initCamera(container) {
-      const aspect = container.clientWidth / container.clientHeight;
-      const frustumSize = 15;
-      networkState.camera = new THREE.OrthographicCamera(
-        frustumSize * aspect / -2, frustumSize * aspect / 2,
-        frustumSize / 2, frustumSize / -2, 0.1, 1000
-      );
-      networkState.camera.position.set(10, 10, 10);
-      networkState.camera.lookAt(0, 0, 0);
+      networkState.camera = createOrthographicCamera(container, 15, { x: 10, y: 10, z: 10 });
     },
 
     initRenderer(container) {
-      networkState.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      networkState.renderer.setSize(container.clientWidth, container.clientHeight);
-      networkState.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      networkState.renderer.shadowMap.enabled = true;
-      networkState.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      container.appendChild(networkState.renderer.domElement);
+      networkState.renderer = createRenderer(container);
     },
 
     initLighting() {
-      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-      networkState.scene.add(ambient);
-      const directional = new THREE.DirectionalLight(0xffffff, 0.6);
-      directional.position.set(15, 20, 15);
-      directional.castShadow = false;  // No shadows anywhere
-      networkState.scene.add(directional);
-      const fill = new THREE.DirectionalLight(0xffffff, 0.3);
-      fill.position.set(-10, 10, -10);
-      networkState.scene.add(fill);
+      addLighting(networkState.scene, {
+        ambientIntensity: 0.7,
+        directionalIntensity: 0.6,
+        enableShadows: false
+      });
     },
 
     addWallNumbers() {

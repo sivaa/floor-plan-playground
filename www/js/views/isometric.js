@@ -6,6 +6,7 @@
 
 import { interpolateColor, getRoomColor } from '../three/color-utils.js';
 import { applyDarkTheme, setWallsVisibility } from '../three/theme-utils.js';
+import { createScene, createRenderer, createOrthographicCamera, addLighting, cleanupThreeState } from '../three/scene-init.js';
 
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const isoState = {
@@ -67,15 +68,7 @@ export function isometricView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS) {
       }
 
       // Clean up any existing Three.js objects
-      if (isoState.renderer) {
-        isoState.renderer.dispose();
-      }
-      if (isoState.scene) {
-        isoState.scene.clear();
-      }
-      if (isoState.animationId) {
-        cancelAnimationFrame(isoState.animationId);
-      }
+      cleanupThreeState(isoState);
 
       this.initScene();
       this.initCamera(container);
@@ -91,61 +84,19 @@ export function isometricView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS) {
     },
 
     initScene() {
-      isoState.scene = new THREE.Scene();
-      isoState.scene.background = new THREE.Color(0xE8E8EA);
+      isoState.scene = createScene(0xE8E8EA);
     },
 
     initCamera(container) {
-      const aspect = container.clientWidth / container.clientHeight;
-      const frustumSize = 15;
-
-      // OrthographicCamera for true isometric projection (no perspective distortion)
-      isoState.camera = new THREE.OrthographicCamera(
-        frustumSize * aspect / -2,  // left
-        frustumSize * aspect / 2,   // right
-        frustumSize / 2,            // top
-        frustumSize / -2,           // bottom
-        0.1,                        // near
-        1000                        // far
-      );
-
-      // True isometric position - fixed angle
-      isoState.camera.position.set(10, 10, 10);
-      isoState.camera.lookAt(0, 0, 0);
+      isoState.camera = createOrthographicCamera(container, 15, { x: 10, y: 10, z: 10 });
     },
 
     initRenderer(container) {
-      isoState.renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true
-      });
-      isoState.renderer.setSize(container.clientWidth, container.clientHeight);
-      isoState.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      isoState.renderer.shadowMap.enabled = true;
-      isoState.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      container.appendChild(isoState.renderer.domElement);
+      isoState.renderer = createRenderer(container);
     },
 
     initLighting() {
-      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-      isoState.scene.add(ambient);
-
-      const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-      directional.position.set(15, 20, 15);
-      directional.castShadow = true;
-      directional.shadow.mapSize.width = 1024;
-      directional.shadow.mapSize.height = 1024;
-      directional.shadow.camera.near = 0.5;
-      directional.shadow.camera.far = 50;
-      directional.shadow.camera.left = -15;
-      directional.shadow.camera.right = 15;
-      directional.shadow.camera.top = 15;
-      directional.shadow.camera.bottom = -15;
-      isoState.scene.add(directional);
-
-      const fill = new THREE.DirectionalLight(0xffffff, 0.3);
-      fill.position.set(-10, 10, -10);
-      isoState.scene.add(fill);
+      addLighting(isoState.scene, { enableShadows: true });
     },
 
     buildFloorPlan() {
