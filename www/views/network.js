@@ -610,9 +610,9 @@ export function networkView() {
       const vertStepWallX = (FLOOR_PLAN_CONFIG.apartmentWidth - notch.width) - centerX;  // 8.239 - centerX
       const westNotchWallThick = 0.08;
 
-      // French door parameters for west notch wall
+      // French door parameters for west notch wall (reduced 30%)
       const frenchDoorCenterZ = FLOOR_PLAN_CONFIG.apartmentDepth - notch.depth / 2;  // 5.915 (center of notch)
-      const frenchDoorWidth = 1.0;  // 1.0m door opening
+      const frenchDoorWidth = 0.7;  // 0.7m door opening (30% smaller)
       const frenchDoorFront = frenchDoorCenterZ - frenchDoorWidth / 2;   // 5.415
       const frenchDoorBack = frenchDoorCenterZ + frenchDoorWidth / 2;    // 6.415
       const frenchDoorHeight = 0.7;  // Door opening height (floor to header)
