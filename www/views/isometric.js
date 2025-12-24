@@ -4,6 +4,9 @@
  * Clean, dashboard-style view for monitoring sensors
  */
 
+import { interpolateColor, getRoomColor } from '../js/three/color-utils.js';
+import { applyDarkTheme, setWallsVisibility } from '../js/three/theme-utils.js';
+
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const isoState = {
   scene: null,
@@ -811,54 +814,21 @@ export function isometricView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS) {
     },
 
     getRoomColor(room, viewMode) {
-      if (!room) return 0xE0E0E0;
-
-      const value = viewMode === 'temperature' ? room.temperature : room.humidity;
-      if (value === null || value === undefined) return 0xE0E0E0;
-
-      const scale = viewMode === 'temperature' ? TEMP_COLORS : HUMIDITY_COLORS;
-      return this.interpolateColor(value, scale);
+      return getRoomColor(room, viewMode, TEMP_COLORS, HUMIDITY_COLORS);
     },
 
     interpolateColor(value, scale) {
-      if (value <= scale[0].value) return scale[0].color;
-      if (value >= scale[scale.length - 1].value) return scale[scale.length - 1].color;
-
-      let lower = scale[0], upper = scale[scale.length - 1];
-      for (let i = 0; i < scale.length - 1; i++) {
-        if (value >= scale[i].value && value <= scale[i + 1].value) {
-          lower = scale[i];
-          upper = scale[i + 1];
-          break;
-        }
-      }
-
-      const factor = (value - lower.value) / (upper.value - lower.value);
-
-      const lowerColor = new THREE.Color(lower.color);
-      const upperColor = new THREE.Color(upper.color);
-      const result = new THREE.Color();
-      result.lerpColors(lowerColor, upperColor, factor);
-
-      return result.getHex();
+      return interpolateColor(value, scale);
     },
 
     toggleWalls() {
       this.wallsVisible = !this.wallsVisible;
-      isoState.wallMeshes.forEach(wall => {
-        wall.visible = this.wallsVisible;
-      });
+      setWallsVisibility(isoState.wallMeshes, this.wallsVisible);
     },
 
     toggleDarkTheme() {
       this.darkTheme = !this.darkTheme;
-      if (this.darkTheme) {
-        isoState.scene.background = new THREE.Color(0x0f172a);
-        isoState.scene.fog = new THREE.Fog(0x0f172a, 10, 50);
-      } else {
-        isoState.scene.background = new THREE.Color(0xE8E8EA);
-        isoState.scene.fog = null;
-      }
+      applyDarkTheme(isoState.scene, this.darkTheme);
     },
 
     animate() {
