@@ -11,4 +11,5 @@ export const ZIGBEE_DEVICES = [
   { id: 'sensor2', name: 'SNZB-03P', type: 'end-device', icon: '🚶', room: 'kitchen', x: 0.5, z: 0.1 },
   { id: 'sensor3', name: 'SNZB-04P', type: 'end-device', icon: '🚪', room: 'bathroom', x: 0.85, z: 0.1 },
   { id: 'trv', name: 'TRVZB', type: 'end-device', icon: '🔥', room: 'bedroom', x: 0.1, z: 0.25 },
+  { id: 'sensor-living-th', name: 'SNZB-02D', type: 'end-device', icon: '🌡️', room: 'living', x: 0.05, z: 0.95 },
 ];

@@ -1064,60 +1064,6 @@ export function networkView() {
       networkState.scene.add(livingDivLed);
 
       // ═══════════════════════════════════════════════════════════════
-      // SONOFF Temperature & Humidity Sensor (SNZB-02D)
-      // Floor-standing at junction of south wall and bedroom-living divider
-      // Inside living room (east side of divider)
-      // ═══════════════════════════════════════════════════════════════
-
-      // Position: West side of living room, near divider wall
-      // Divider wall at x=4.489, moved north to be visible from camera
-      const dividerX = 2.2445 + 4.489/2;  // = 4.489
-      const sensorX = dividerX + 0.5 - centerX;  // 50cm into living room from divider
-      const sensorZ = FLOOR_PLAN_CONFIG.apartmentDepth - 1.2 - centerZ;  // 1.2m from south wall (visible)
-      const sensorY = 0.25;  // Raised off floor
-
-      // Main sensor body - LARGE white cube for visibility
-      const sensorMat = new THREE.MeshStandardMaterial({
-        color: 0xFFFFFF,
-        metalness: 0.1,
-        roughness: 0.4,
-        emissive: 0xFFFFFF,
-        emissiveIntensity: 0.3
-      });
-      const sensorBody = new THREE.Mesh(
-        new THREE.BoxGeometry(0.25, 0.30, 0.15),  // 25cm x 30cm x 15cm - LARGE
-        sensorMat
-      );
-      sensorBody.position.set(sensorX, sensorY, sensorZ);
-      networkState.scene.add(sensorBody);
-
-      // LCD display (dark with cyan glow)
-      const displayMat = new THREE.MeshStandardMaterial({
-        color: 0x001133,
-        emissive: 0x00FFFF,
-        emissiveIntensity: 1.0
-      });
-      const sensorDisplay = new THREE.Mesh(
-        new THREE.BoxGeometry(0.26, 0.18, 0.08),
-        displayMat
-      );
-      sensorDisplay.position.set(sensorX, sensorY + 0.03, sensorZ);
-      networkState.scene.add(sensorDisplay);
-
-      // Bright green LED on top
-      const sonoffLedMat = new THREE.MeshStandardMaterial({
-        color: 0x00FF00,
-        emissive: 0x00FF00,
-        emissiveIntensity: 2.0
-      });
-      const sensorLed = new THREE.Mesh(
-        new THREE.SphereGeometry(0.05, 16, 16),
-        sonoffLedMat
-      );
-      sensorLed.position.set(sensorX, sensorY + 0.20, sensorZ);
-      networkState.scene.add(sensorLed);
-
-      // ═══════════════════════════════════════════════════════════════
       // WINDOW X MARKERS - Blue X on floor (like door markers but blue)
       // ═══════════════════════════════════════════════════════════════
       const windowMarkerMat = new THREE.MeshBasicMaterial({ color: 0x0066FF });
