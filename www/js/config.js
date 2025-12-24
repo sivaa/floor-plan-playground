@@ -172,9 +172,16 @@ export const THERMOSTAT_EVENT_TYPES = {
     priority: 'activity',
     category: 'control'
   },
+  preset_changed: {
+    icon: '🚀',
+    color: '#06b6d4',
+    label: 'Preset Changed',
+    priority: 'activity',
+    category: 'control'
+  },
   child_lock_changed: {
     icon: '🔒',
-    color: '#6366f1',
+    color: '#64748b',
     label: 'Child Lock Changed',
     priority: 'activity',
     category: 'control'
@@ -183,6 +190,13 @@ export const THERMOSTAT_EVENT_TYPES = {
     icon: '🪟',
     color: '#06b6d4',
     label: 'Window Detected',
+    priority: 'activity',
+    category: 'system'
+  },
+  initial_state: {
+    icon: '📍',
+    color: '#6366f1',
+    label: 'Initial State',
     priority: 'activity',
     category: 'system'
   },
@@ -201,6 +215,13 @@ export const THERMOSTAT_EVENT_TYPES = {
     label: 'Battery OK',
     priority: 'background',
     category: 'system'
+  },
+  temp_update: {
+    icon: '🌡️',
+    color: '#94a3b8',
+    label: 'Temperature Update',
+    priority: 'background',
+    category: 'data'
   },
   calibration_changed: {
     icon: '🔧',

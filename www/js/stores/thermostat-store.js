@@ -3,29 +3,7 @@
  * Manages SONOFF TRVZB thermostat control and event tracking
  */
 
-// Event type definitions for thermostat timeline
-const THERMOSTAT_EVENT_TYPES = {
-  // IMPORTANT (full cards)
-  heating_started: { icon: '🔥', color: '#ef4444', label: 'Heating Started', priority: 'important', category: 'heating' },
-  heating_stopped: { icon: '❄️', color: '#3b82f6', label: 'Heating Stopped', priority: 'important', category: 'heating' },
-  target_reached: { icon: '✅', color: '#22c55e', label: 'Target Reached', priority: 'important', category: 'heating' },
-  device_offline: { icon: '📡', color: '#ef4444', label: 'Device Offline', priority: 'important', category: 'system' },
-  low_battery: { icon: '🪫', color: '#f59e0b', label: 'Low Battery', priority: 'important', category: 'system' },
-
-  // ACTIVITY (compact lines)
-  setpoint_changed: { icon: '🎯', color: '#f59e0b', label: 'Setpoint Changed', priority: 'activity', category: 'control' },
-  mode_changed: { icon: '⚙️', color: '#8b5cf6', label: 'Mode Changed', priority: 'activity', category: 'control' },
-  preset_changed: { icon: '🚀', color: '#06b6d4', label: 'Preset Changed', priority: 'activity', category: 'control' },
-  child_lock_changed: { icon: '🔒', color: '#64748b', label: 'Child Lock Changed', priority: 'activity', category: 'control' },
-
-  // BACKGROUND (collapsed)
-  device_online: { icon: '📡', color: '#22c55e', label: 'Device Online', priority: 'background', category: 'system' },
-  battery_ok: { icon: '🔋', color: '#22c55e', label: 'Battery OK', priority: 'background', category: 'system' },
-  temp_update: { icon: '🌡️', color: '#94a3b8', label: 'Temperature Update', priority: 'background', category: 'data' },
-
-  // INITIAL STATE (activity level - shows on first connect)
-  initial_state: { icon: '📍', color: '#6366f1', label: 'Initial State', priority: 'activity', category: 'system' }
-};
+import { THERMOSTAT_EVENT_TYPES } from '../config.js';
 
 export function initThermostatStore(Alpine, CONFIG) {
   Alpine.store('thermostats', {
