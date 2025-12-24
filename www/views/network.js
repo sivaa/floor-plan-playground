@@ -378,8 +378,8 @@ export function networkView() {
       const w4Left = w4CenterZ - w4Width / 2;
       const w4Right = w4CenterZ + w4Width / 2;
 
-      // W3 window (Bedroom) - centered at z=5.5 (middle of bedroom)
-      const w3CenterZ = 5.5;
+      // W3 window (Bedroom) - centered at z=5.2 (true center of bedroom)
+      const w3CenterZ = 5.2;
       const w3Left = w3CenterZ - w3Width / 2;   // 4.8
       const w3Right = w3CenterZ + w3Width / 2;  // 6.2
 
