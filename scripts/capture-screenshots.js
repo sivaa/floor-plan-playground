@@ -1,6 +1,6 @@
 /**
  * Screenshot Capture Script
- * Captures baseline screenshots of standalone-v2.html in various states and viewports
+ * Captures screenshots of index.html in various states and viewports
  */
 
 import { chromium } from 'playwright';
@@ -24,11 +24,9 @@ const mimeTypes = {
   '.json': 'application/json',
 };
 
-// Viewport configurations
+// Viewport configurations (desktop only)
 const viewports = {
   desktop: { width: 1920, height: 1080 },
-  tablet: { width: 768, height: 1024 },
-  mobile: { width: 375, height: 667 },
 };
 
 // Screenshot states to capture
@@ -47,7 +45,7 @@ const states = [
 ];
 
 // Create a simple HTTP server to serve static files
-function createStaticServer(port, defaultFile = 'standalone-v2.html') {
+function createStaticServer(port, defaultFile = 'index.html') {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let filePath = req.url === '/' ? `/${defaultFile}` : req.url;
@@ -82,7 +80,7 @@ async function captureScreenshots(outputDir = 'baseline', externalPort = null) {
   } else {
     // Use internal static server
     port = 3456;
-    const defaultFile = outputDir === 'baseline' ? 'standalone-v2.html' : 'index.html';
+    const defaultFile = 'index.html';  // Always use modular entry point
     server = await createStaticServer(port, defaultFile);
     console.log(`\n📸 Capturing screenshots to screenshots/${outputDir}/ (from ${defaultFile})\n`);
   }

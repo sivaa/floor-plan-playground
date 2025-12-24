@@ -30,7 +30,6 @@ docker compose up -d
 floor-plan-playground/
 ├── www/                        # Source files
 │   ├── index.html              # Main entry point (modular)
-│   ├── standalone-v2.html      # Reference file (baseline)
 │   ├── js/
 │   │   ├── config.js           # FLOOR_PLAN_CONFIG, room/device configuration
 │   │   └── data/
@@ -40,13 +39,13 @@ floor-plan-playground/
 │   ├── styles/                 # CSS stylesheets
 │   └── types.d.ts              # TypeScript declarations for globals
 ├── scripts/
-│   ├── capture-screenshots.js  # Playwright screenshot capture
+│   ├── capture-screenshots.js  # Playwright screenshot capture (desktop only)
 │   └── compare-screenshots.js  # pixelmatch comparison
 ├── tests/
 │   └── visual-regression.test.js  # Vitest visual regression tests
 ├── screenshots/
-│   ├── baseline/               # Reference screenshots (from standalone-v2.html)
-│   └── current/                # Current screenshots (from index.html)
+│   ├── baseline/desktop/       # Reference screenshots
+│   └── current/desktop/        # Current screenshots
 ├── vite.config.js              # Vite configuration
 ├── tsconfig.json               # TypeScript/JSDoc configuration
 ├── vitest.config.js            # Vitest configuration
@@ -115,7 +114,6 @@ Edit `www/js/config.js` FLOOR_PLAN_CONFIG.rooms:
 | `www/js/config.js` | Room/device/door/window configuration |
 | `www/js/data/zigbee-devices.js` | Zigbee device list |
 | `www/index.html` | Main HTML entry point |
-| `www/standalone-v2.html` | Visual reference (DO NOT MODIFY) |
 
 ## NPM Scripts
 
@@ -127,8 +125,8 @@ Edit `www/js/config.js` FLOOR_PLAN_CONFIG.rooms:
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run Vitest tests |
 | `npm run test:watch` | Run tests in watch mode |
-| `npm run screenshots:baseline` | Capture baseline from standalone-v2.html |
-| `npm run screenshots:capture` | Capture current from index.html |
+| `npm run screenshots:baseline` | Capture baseline screenshots (desktop only) |
+| `npm run screenshots:capture` | Capture current screenshots (desktop only) |
 | `npm run screenshots:compare` | Compare current vs baseline |
 
 ## Tech Stack

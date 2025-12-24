@@ -400,15 +400,36 @@ export function networkView() {
       networkState.scene.add(eastWallUpper3);
       networkState.wallMeshes.push(eastWallUpper3);
 
-      // Wall 9: East wall lower (Study+Living right - SHORTENED for balcony notch)
+      // Wall 14: East wall lower - Split for W2 window cut at z=4.2
       // From z=0 to z=5.165 (stops before notch) at x = apartment east edge
       const wall9X = FLOOR_PLAN_CONFIG.apartmentWidth;  // 9.239 (east edge)
-      const eastWallEndZ = FLOOR_PLAN_CONFIG.apartmentDepth - notch.depth;  // 6.665 - 1.5 = 5.165
-      const eastWallCenterZ = eastWallEndZ / 2 - centerZ;  // Center of shortened wall
-      const eastWallLower = new THREE.Mesh(new THREE.BoxGeometry(0.08, wallHeight, eastWallEndZ), wallMat);
-      eastWallLower.position.set(wall9X - centerX, wallHeight/2, eastWallCenterZ);
-      networkState.scene.add(eastWallLower);
-      networkState.wallMeshes.push(eastWallLower);
+      const eastWallEndZ = FLOOR_PLAN_CONFIG.apartmentDepth - notch.depth;  // 5.165
+
+      // W2 window cut parameters (1.0m opening centered at z=4.2)
+      const w2CenterZ = 4.2;
+      const w2CutSize = 1.0;  // Window opening size (smaller than full window marker)
+      const w2Top = w2CenterZ - w2CutSize / 2;  // 3.7 (north edge of cut)
+      const w2Bottom = w2CenterZ + w2CutSize / 2;  // 4.7 (south edge of cut)
+
+      // Segment 1: z=0 to window top edge (north portion)
+      const eastLowerSeg1Depth = w2Top;  // 3.7
+      const eastLowerSeg1CenterZ = eastLowerSeg1Depth / 2 - centerZ;
+      const eastWallLower1 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, wallHeight, eastLowerSeg1Depth), wallMat
+      );
+      eastWallLower1.position.set(wall9X - centerX, wallHeight/2, eastLowerSeg1CenterZ);
+      networkState.scene.add(eastWallLower1);
+      networkState.wallMeshes.push(eastWallLower1);
+
+      // Segment 2: window bottom to wall end (south portion)
+      const eastLowerSeg2Depth = eastWallEndZ - w2Bottom;  // 5.165 - 4.7 = 0.465
+      const eastLowerSeg2CenterZ = (w2Bottom + eastWallEndZ) / 2 - centerZ;
+      const eastWallLower2 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, wallHeight, eastLowerSeg2Depth), wallMat
+      );
+      eastWallLower2.position.set(wall9X - centerX, wallHeight/2, eastLowerSeg2CenterZ);
+      networkState.scene.add(eastWallLower2);
+      networkState.wallMeshes.push(eastWallLower2);
 
       // Wall 10: South wall (gap on EAST side for balcony notch)
       const southWallZ = FLOOR_PLAN_CONFIG.apartmentDepth;  // 6.665
