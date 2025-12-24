@@ -4,7 +4,7 @@
  * Features: Event timeline, delivery patterns, signal health, real-time updates
  */
 
-import { CONFIG } from '../js/config.js';
+import { CONFIG } from '../config.js';
 
 export function mailboxView() {
   return {

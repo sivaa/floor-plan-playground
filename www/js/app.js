@@ -14,20 +14,20 @@ import { initThermostatStore } from './stores/thermostat-store.js';
 import { OrbitControls } from './three/orbit-controls.js';
 
 // Import view components
-import { comfortScoreView } from '../views/comfort-score.js';
-import { barCompareView } from '../views/bar-compare.js';
-import { floorPlanView } from '../views/floor-plan.js';
-import { ambientView } from '../views/ambient.js';
-import { timelineView } from '../views/timeline.js';
-import { classicView } from '../views/classic.js';
-import { lightsView } from '../views/lights.js';
-import { threeDView } from '../views/floor-plan-3d.js';
-import { sensorConfigView } from '../views/sensor-config.js';
-import { co2View } from '../views/co2-monitor.js';
-import { isometricView } from '../views/isometric.js';
-import { networkView } from '../views/network.js';
-import { thermostatView } from '../views/thermostat.js';
-import { mailboxView } from '../views/mailbox.js';
+import { comfortScoreView } from './views/comfort-score.js';
+import { barCompareView } from './views/bar-compare.js';
+import { floorPlanView } from './views/floor-plan.js';
+import { ambientView } from './views/ambient.js';
+import { timelineView } from './views/timeline.js';
+import { classicView } from './views/classic.js';
+import { lightsView } from './views/lights.js';
+import { threeDView } from './views/floor-plan-3d.js';
+import { sensorConfigView } from './views/sensor-config.js';
+import { co2View } from './views/co2-monitor.js';
+import { isometricView } from './views/isometric.js';
+import { networkView } from './views/network.js';
+import { thermostatView } from './views/thermostat.js';
+import { mailboxView } from './views/mailbox.js';
 
 // Make OrbitControls available to Three.js
 if (typeof THREE !== 'undefined') {

@@ -4,8 +4,8 @@
  * Clean, dashboard-style view for monitoring sensors
  */
 
-import { interpolateColor, getRoomColor } from '../js/three/color-utils.js';
-import { applyDarkTheme, setWallsVisibility } from '../js/three/theme-utils.js';
+import { interpolateColor, getRoomColor } from '../three/color-utils.js';
+import { applyDarkTheme, setWallsVisibility } from '../three/theme-utils.js';
 
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const isoState = {

@@ -3,10 +3,10 @@
  * Warm beige monochromatic 3D floor plan with device markers
  */
 
-import { ZIGBEE_DEVICES } from '../js/data/zigbee-devices.js';
-import { FLOOR_PLAN_CONFIG } from '../js/config.js';
-import { createNumberSprite } from '../js/three/sprite-factory.js';
-import { createRadiatorMaterial, createTrvzbBodyMaterial, createLedMaterial } from '../js/three/radiator-materials.js';
+import { ZIGBEE_DEVICES } from '../data/zigbee-devices.js';
+import { FLOOR_PLAN_CONFIG } from '../config.js';
+import { createNumberSprite } from '../three/sprite-factory.js';
+import { createRadiatorMaterial, createTrvzbBodyMaterial, createLedMaterial } from '../three/radiator-materials.js';
 
 // Persistent state across view switches
 const networkState = {
