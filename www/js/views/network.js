@@ -7,6 +7,7 @@ import { ZIGBEE_DEVICES } from '../data/zigbee-devices.js';
 import { FLOOR_PLAN_CONFIG } from '../config.js';
 import { createNumberSprite } from '../three/sprite-factory.js';
 import { createRadiatorMaterial, createTrvzbBodyMaterial, createLedMaterial } from '../three/radiator-materials.js';
+import { createRadiatorWithValve } from '../three/radiator-builder.js';
 import { createScene, createRenderer, createOrthographicCamera, addLighting, cleanupThreeState } from '../three/scene-init.js';
 
 // Persistent state across view switches
@@ -676,255 +677,58 @@ export function networkView() {
       // RADIATORS - Premium European Column Style with TRVZB Valve
       // ═══════════════════════════════════════════════════════════════
 
-      // Main radiator material - blends perfectly with room
-      const radiatorMat = createRadiatorMaterial();
-
       // Bedroom radiator - below W3 window (west wall, z=4.7)
-      const radHeight = 0.30;
-      const radWidth = 0.40;
-      const columnsPerRow = 10;
-      const columnRadius = 0.012;
+      createRadiatorWithValve({
+        x: 0.15 + 0.025 - centerX,
+        z: 4.7 - centerZ,
+        direction: 'west'
+      }).forEach(m => networkState.scene.add(m));
+
+      // Study radiator - under W1 window (east wall, z=1.5)
+      createRadiatorWithValve({
+        x: FLOOR_PLAN_CONFIG.apartmentWidth - 0.05 - centerX,
+        z: 1.5 - centerZ,
+        direction: 'east'
+      }).forEach(m => networkState.scene.add(m));
+
+      // Living radiator - under W2 window (east wall, z=4.2)
+      createRadiatorWithValve({
+        x: FLOOR_PLAN_CONFIG.apartmentWidth - 0.05 - centerX,
+        z: 4.2 - centerZ,
+        direction: 'east'
+      }).forEach(m => networkState.scene.add(m));
+
+      // ─────────────────────────────────────────────────────────────────
+      // Bathroom radiator - special north-wall orientation (X-axis columns)
+      // ─────────────────────────────────────────────────────────────────
+      const radiatorMat = createRadiatorMaterial();
+      const trvzbBodyMat = createTrvzbBodyMaterial();
+      const ledMat = createLedMaterial();
+      const radHeight = 0.30, radWidth = 0.40, columnsPerRow = 10;
+      const columnRadius = 0.012, rowSpacing = 0.025, railHeight = 0.018, radBaseY = 0.04;
       const columnSpacing = radWidth / (columnsPerRow + 1);
-      const rowSpacing = 0.025;
-      const railHeight = 0.018;
-      const radX = 0.15 + 0.025 - centerX;
-      const radZ = 4.7 - centerZ;
-      const radBaseY = 0.04;
-
-      // Create double-row columns (ultra-smooth with 32 segments)
-      for (let row = 0; row < 2; row++) {
-        for (let i = 0; i < columnsPerRow; i++) {
-          const column = new THREE.Mesh(
-            new THREE.CylinderGeometry(columnRadius, columnRadius, radHeight - railHeight * 2, 32),
-            radiatorMat
-          );
-          const zOffset = -radWidth/2 + columnSpacing * (i + 1);
-          const xOffset = row * rowSpacing;
-          column.position.set(radX + xOffset, radBaseY + radHeight/2, radZ + zOffset);
-          networkState.scene.add(column);
-        }
-      }
-
-      // Top rail (rounded ends)
-      const topRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      topRail.position.set(radX + rowSpacing/2, radBaseY + radHeight - railHeight/2, radZ);
-      networkState.scene.add(topRail);
-
-      // Bottom rail
-      const bottomRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      bottomRail.position.set(radX + rowSpacing/2, radBaseY + railHeight/2, radZ);
-      networkState.scene.add(bottomRail);
-
-      // Wall brackets
-      [-radWidth/3, radWidth/3].forEach(zOff => {
-        const bracket = new THREE.Mesh(
-          new THREE.BoxGeometry(0.02, 0.025, 0.025),
-          radiatorMat
-        );
-        bracket.position.set(radX - 0.01, radBaseY + radHeight * 0.6, radZ + zOff);
-        networkState.scene.add(bracket);
-      });
-
-      // ═══════════════════════════════════════════════════════════════
-      // TRVZB Smart Thermostat Valve (the crown jewel)
-      // ═══════════════════════════════════════════════════════════════
-      const trvzbX = radX + rowSpacing/2;
-      const trvzbZ = radZ + radWidth/4;  // Offset from center
       const trvzbBaseY = radBaseY + radHeight;
 
-      // Valve body (white cylinder)
-      const trvzbBodyMat = createTrvzbBodyMaterial();
-      const trvzbBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24),
-        trvzbBodyMat
-      );
-      trvzbBody.position.set(trvzbX, trvzbBaseY + 0.02, trvzbZ);
-      networkState.scene.add(trvzbBody);
+      const bathRadX = 1.7 - centerX;
+      const bathRadZ = 0.15 - centerZ;
 
-      // Connector pipe
-      const trvzbConnector = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 16),
-        radiatorMat
-      );
-      trvzbConnector.position.set(trvzbX, trvzbBaseY + 0.005, trvzbZ);
-      networkState.scene.add(trvzbConnector);
-
-      // Orange LED indicator (glowing)
-      const ledMat = createLedMaterial();
-      const led = new THREE.Mesh(
-        new THREE.SphereGeometry(0.004, 16, 16),
-        ledMat
-      );
-      led.position.set(trvzbX, trvzbBaseY + 0.035, trvzbZ + 0.012);
-      networkState.scene.add(led);
-
-      // ─────────────────────────────────────────────────────────────────
-      // Study radiator - under W1 window (east wall, z=1.5)
-      // ─────────────────────────────────────────────────────────────────
-      const studyRadX = FLOOR_PLAN_CONFIG.apartmentWidth - 0.05 - centerX;  // Inside east wall
-      const studyRadZ = 1.5 - centerZ;  // W1 window center
-
-      // Double-row columns for Study
+      // Double-row columns (X-axis orientation)
       for (let row = 0; row < 2; row++) {
         for (let i = 0; i < columnsPerRow; i++) {
           const column = new THREE.Mesh(
             new THREE.CylinderGeometry(columnRadius, columnRadius, radHeight - railHeight * 2, 32),
             radiatorMat
           );
-          const zOffset = -radWidth/2 + columnSpacing * (i + 1);
-          const xOffset = -row * rowSpacing;  // Negative (towards room interior)
-          column.position.set(studyRadX + xOffset, radBaseY + radHeight/2, studyRadZ + zOffset);
-          networkState.scene.add(column);
-        }
-      }
-
-      // Study top rail
-      const studyTopRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      studyTopRail.position.set(studyRadX - rowSpacing/2, radBaseY + radHeight - railHeight/2, studyRadZ);
-      networkState.scene.add(studyTopRail);
-
-      // Study bottom rail
-      const studyBottomRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      studyBottomRail.position.set(studyRadX - rowSpacing/2, radBaseY + railHeight/2, studyRadZ);
-      networkState.scene.add(studyBottomRail);
-
-      // Study wall brackets
-      [-radWidth/3, radWidth/3].forEach(zOff => {
-        const bracket = new THREE.Mesh(
-          new THREE.BoxGeometry(0.02, 0.025, 0.025),
-          radiatorMat
-        );
-        bracket.position.set(studyRadX + 0.01, radBaseY + radHeight * 0.6, studyRadZ + zOff);
-        networkState.scene.add(bracket);
-      });
-
-      // Study TRVZB valve
-      const studyTrvzbX = studyRadX - rowSpacing/2;
-      const studyTrvzbZ = studyRadZ + radWidth/4;
-      const studyTrvzbBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24),
-        trvzbBodyMat
-      );
-      studyTrvzbBody.position.set(studyTrvzbX, trvzbBaseY + 0.02, studyTrvzbZ);
-      networkState.scene.add(studyTrvzbBody);
-
-      const studyConnector = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 16),
-        radiatorMat
-      );
-      studyConnector.position.set(studyTrvzbX, trvzbBaseY + 0.005, studyTrvzbZ);
-      networkState.scene.add(studyConnector);
-
-      const studyLed = new THREE.Mesh(
-        new THREE.SphereGeometry(0.004, 16, 16),
-        ledMat
-      );
-      studyLed.position.set(studyTrvzbX, trvzbBaseY + 0.035, studyTrvzbZ + 0.012);
-      networkState.scene.add(studyLed);
-
-      // ─────────────────────────────────────────────────────────────────
-      // Living radiator - under W2 window (east wall, z=4.2)
-      // ─────────────────────────────────────────────────────────────────
-      const livingRadX = FLOOR_PLAN_CONFIG.apartmentWidth - 0.05 - centerX;  // Inside east wall
-      const livingRadZ = 4.2 - centerZ;  // W2 window center
-
-      // Double-row columns for Living
-      for (let row = 0; row < 2; row++) {
-        for (let i = 0; i < columnsPerRow; i++) {
-          const column = new THREE.Mesh(
-            new THREE.CylinderGeometry(columnRadius, columnRadius, radHeight - railHeight * 2, 32),
-            radiatorMat
+          column.position.set(
+            bathRadX + (-radWidth/2 + columnSpacing * (i + 1)),
+            radBaseY + radHeight/2,
+            bathRadZ + row * rowSpacing
           );
-          const zOffset = -radWidth/2 + columnSpacing * (i + 1);
-          const xOffset = -row * rowSpacing;
-          column.position.set(livingRadX + xOffset, radBaseY + radHeight/2, livingRadZ + zOffset);
           networkState.scene.add(column);
         }
       }
 
-      // Living top rail
-      const livingTopRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      livingTopRail.position.set(livingRadX - rowSpacing/2, radBaseY + radHeight - railHeight/2, livingRadZ);
-      networkState.scene.add(livingTopRail);
-
-      // Living bottom rail
-      const livingBottomRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      livingBottomRail.position.set(livingRadX - rowSpacing/2, radBaseY + railHeight/2, livingRadZ);
-      networkState.scene.add(livingBottomRail);
-
-      // Living wall brackets
-      [-radWidth/3, radWidth/3].forEach(zOff => {
-        const bracket = new THREE.Mesh(
-          new THREE.BoxGeometry(0.02, 0.025, 0.025),
-          radiatorMat
-        );
-        bracket.position.set(livingRadX + 0.01, radBaseY + radHeight * 0.6, livingRadZ + zOff);
-        networkState.scene.add(bracket);
-      });
-
-      // Living TRVZB valve
-      const livingTrvzbX = livingRadX - rowSpacing/2;
-      const livingTrvzbZ = livingRadZ + radWidth/4;
-      const livingTrvzbBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24),
-        trvzbBodyMat
-      );
-      livingTrvzbBody.position.set(livingTrvzbX, trvzbBaseY + 0.02, livingTrvzbZ);
-      networkState.scene.add(livingTrvzbBody);
-
-      const livingConnector = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 16),
-        radiatorMat
-      );
-      livingConnector.position.set(livingTrvzbX, trvzbBaseY + 0.005, livingTrvzbZ);
-      networkState.scene.add(livingConnector);
-
-      const livingLed = new THREE.Mesh(
-        new THREE.SphereGeometry(0.004, 16, 16),
-        ledMat
-      );
-      livingLed.position.set(livingTrvzbX, trvzbBaseY + 0.035, livingTrvzbZ + 0.012);
-      networkState.scene.add(livingLed);
-
-      // ─────────────────────────────────────────────────────────────────
-      // Bathroom radiator - inside bathroom on north wall (z≈0)
-      // ─────────────────────────────────────────────────────────────────
-      const bathRadX = 1.7 - centerX;  // Center of bathroom
-      const bathRadZ = 0.15 - centerZ;  // Against north wall (inside bathroom)
-
-      // Double-row columns for Bathroom
-      for (let row = 0; row < 2; row++) {
-        for (let i = 0; i < columnsPerRow; i++) {
-          const column = new THREE.Mesh(
-            new THREE.CylinderGeometry(columnRadius, columnRadius, radHeight - railHeight * 2, 32),
-            radiatorMat
-          );
-          const xOffset = -radWidth/2 + columnSpacing * (i + 1);
-          const zOffset = row * rowSpacing;
-          column.position.set(bathRadX + xOffset, radBaseY + radHeight/2, bathRadZ + zOffset);
-          networkState.scene.add(column);
-        }
-      }
-
-      // Bathroom top rail
+      // Bathroom rails (rotated 90°)
       const bathTopRail = new THREE.Mesh(
         new THREE.BoxGeometry(radWidth + 0.01, railHeight, rowSpacing + 0.02),
         radiatorMat
@@ -932,7 +736,6 @@ export function networkView() {
       bathTopRail.position.set(bathRadX, radBaseY + radHeight - railHeight/2, bathRadZ + rowSpacing/2);
       networkState.scene.add(bathTopRail);
 
-      // Bathroom bottom rail
       const bathBottomRail = new THREE.Mesh(
         new THREE.BoxGeometry(radWidth + 0.01, railHeight, rowSpacing + 0.02),
         radiatorMat
@@ -940,12 +743,9 @@ export function networkView() {
       bathBottomRail.position.set(bathRadX, radBaseY + railHeight/2, bathRadZ + rowSpacing/2);
       networkState.scene.add(bathBottomRail);
 
-      // Bathroom wall brackets
+      // Bathroom brackets
       [-radWidth/3, radWidth/3].forEach(xOff => {
-        const bracket = new THREE.Mesh(
-          new THREE.BoxGeometry(0.025, 0.025, 0.02),
-          radiatorMat
-        );
+        const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.025, 0.02), radiatorMat);
         bracket.position.set(bathRadX + xOff, radBaseY + radHeight * 0.6, bathRadZ - 0.01);
         networkState.scene.add(bracket);
       });
@@ -954,96 +754,27 @@ export function networkView() {
       const bathTrvzbX = bathRadX + radWidth/4;
       const bathTrvzbZ = bathRadZ + rowSpacing/2;
       const bathTrvzbBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24),
-        trvzbBodyMat
+        new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24), trvzbBodyMat
       );
       bathTrvzbBody.position.set(bathTrvzbX, trvzbBaseY + 0.02, bathTrvzbZ);
       networkState.scene.add(bathTrvzbBody);
 
       const bathConnector = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 16),
-        radiatorMat
+        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 16), radiatorMat
       );
       bathConnector.position.set(bathTrvzbX, trvzbBaseY + 0.005, bathTrvzbZ);
       networkState.scene.add(bathConnector);
 
-      const bathLed = new THREE.Mesh(
-        new THREE.SphereGeometry(0.004, 16, 16),
-        ledMat
-      );
+      const bathLed = new THREE.Mesh(new THREE.SphereGeometry(0.004, 16, 16), ledMat);
       bathLed.position.set(bathTrvzbX + 0.012, trvzbBaseY + 0.035, bathTrvzbZ);
       networkState.scene.add(bathLed);
 
-      // ─────────────────────────────────────────────────────────────────
-      // Living room radiator - on bedroom-living divider (wall 1), facing into living
-      // Wall is at x = bathroom.x + bathroom.width/2 + 0.8 = 4.197
-      // ─────────────────────────────────────────────────────────────────
-      const livingDividerX = 4.197 + 0.05 - centerX;  // Against bedroom-living divider wall (4.197)
-      const livingDividerZ = 5.2 - centerZ;  // Middle of living room
-
-      // Double-row columns for Living divider
-      for (let row = 0; row < 2; row++) {
-        for (let i = 0; i < columnsPerRow; i++) {
-          const column = new THREE.Mesh(
-            new THREE.CylinderGeometry(columnRadius, columnRadius, radHeight - railHeight * 2, 32),
-            radiatorMat
-          );
-          const zOffset = -radWidth/2 + columnSpacing * (i + 1);
-          const xOffset = row * rowSpacing;
-          column.position.set(livingDividerX + xOffset, radBaseY + radHeight/2, livingDividerZ + zOffset);
-          networkState.scene.add(column);
-        }
-      }
-
-      // Living divider top rail
-      const livingDivTopRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      livingDivTopRail.position.set(livingDividerX + rowSpacing/2, radBaseY + radHeight - railHeight/2, livingDividerZ);
-      networkState.scene.add(livingDivTopRail);
-
-      // Living divider bottom rail
-      const livingDivBottomRail = new THREE.Mesh(
-        new THREE.BoxGeometry(rowSpacing + 0.02, railHeight, radWidth + 0.01),
-        radiatorMat
-      );
-      livingDivBottomRail.position.set(livingDividerX + rowSpacing/2, radBaseY + railHeight/2, livingDividerZ);
-      networkState.scene.add(livingDivBottomRail);
-
-      // Living divider wall brackets
-      [-radWidth/3, radWidth/3].forEach(zOff => {
-        const bracket = new THREE.Mesh(
-          new THREE.BoxGeometry(0.02, 0.025, 0.025),
-          radiatorMat
-        );
-        bracket.position.set(livingDividerX - 0.01, radBaseY + radHeight * 0.6, livingDividerZ + zOff);
-        networkState.scene.add(bracket);
-      });
-
-      // Living divider TRVZB valve
-      const livingDivTrvzbX = livingDividerX + rowSpacing/2;
-      const livingDivTrvzbZ = livingDividerZ + radWidth/4;
-      const livingDivTrvzbBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24),
-        trvzbBodyMat
-      );
-      livingDivTrvzbBody.position.set(livingDivTrvzbX, trvzbBaseY + 0.02, livingDivTrvzbZ);
-      networkState.scene.add(livingDivTrvzbBody);
-
-      const livingDivConnector = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 16),
-        radiatorMat
-      );
-      livingDivConnector.position.set(livingDivTrvzbX, trvzbBaseY + 0.005, livingDivTrvzbZ);
-      networkState.scene.add(livingDivConnector);
-
-      const livingDivLed = new THREE.Mesh(
-        new THREE.SphereGeometry(0.004, 16, 16),
-        ledMat
-      );
-      livingDivLed.position.set(livingDivTrvzbX, trvzbBaseY + 0.035, livingDivTrvzbZ + 0.012);
-      networkState.scene.add(livingDivLed);
+      // Living divider radiator - on bedroom-living wall
+      createRadiatorWithValve({
+        x: 4.197 + 0.05 - centerX,
+        z: 5.2 - centerZ,
+        direction: 'west'
+      }).forEach(m => networkState.scene.add(m));
 
       // ═══════════════════════════════════════════════════════════════
       // WINDOW X MARKERS - Blue X on floor (like door markers but blue)
