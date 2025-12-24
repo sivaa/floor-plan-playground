@@ -1019,8 +1019,9 @@ export function networkView() {
 
       // ─────────────────────────────────────────────────────────────────
       // Living room radiator - on bedroom-living divider (wall 1), facing into living
+      // Wall is at x = bathroom.x + bathroom.width/2 + 0.8 = 4.197
       // ─────────────────────────────────────────────────────────────────
-      const livingDividerX = 4.5 - 0.02 - centerX;  // Touching bedroom-living divider wall
+      const livingDividerX = 4.197 + 0.05 - centerX;  // Against bedroom-living divider wall (4.197)
       const livingDividerZ = 5.2 - centerZ;  // Middle of living room
 
       // Double-row columns for Living divider
