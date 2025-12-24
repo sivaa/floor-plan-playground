@@ -243,10 +243,7 @@ export const FLOOR_PLAN_CONFIG = {
     { x: 0, z: 4.8, rotation: Math.PI/2, type: 'entry', swingDirection: 'east' }  // Main entry door (west wall in mirrored layout)
   ],
   windows: [
-    { x: 9.239, z: 1.5, rotation: Math.PI/2, size: 2.5 },     // W1: Study right (shifted north)
-    { x: 9.239, z: 4.2, rotation: Math.PI/2, size: 2.5 },     // W2: Living right (east wall)
-    { x: 0, z: 4.7, rotation: Math.PI/2, size: 2.5 },         // W3: Bedroom left (moved north)
-    // W4 and W5 markers removed - window openings still exist in west wall
+    // All window markers removed - window openings still exist in walls
   ],
   furniture: [
     { type: 'bed', room: 'bedroom', width: 1.8, depth: 2.0, height: 0.6 }
