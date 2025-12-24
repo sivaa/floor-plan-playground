@@ -245,7 +245,7 @@ export const FLOOR_PLAN_CONFIG = {
   windows: [
     { x: 9.239, z: 1.5, rotation: Math.PI/2, size: 2.5 },     // W1: Study right (shifted north)
     { x: 9.239, z: 4.2, rotation: Math.PI/2, size: 2.5 },     // W2: Living right (east wall)
-    { x: 0, z: 5.2, rotation: Math.PI/2, size: 2.5 },         // W3: Bedroom left (centered)
+    { x: 0, z: 4.7, rotation: Math.PI/2, size: 2.5 },         // W3: Bedroom left (moved north)
     // W4 and W5 markers removed - window openings still exist in west wall
   ],
   furniture: [
