@@ -352,30 +352,36 @@ export function networkView() {
       networkState.scene.add(northWall2);
       networkState.wallMeshes.push(northWall2);
 
-      // Wall 7: West wall with W5 + W4 window cuts (proper frame)
-      // Creates 5 pieces: sill, header, section1, section2, section3 - with 2 window holes
+      // Wall 7: West wall with W5 + W4 + W3 window cuts (proper frame)
+      // Creates 6 pieces: sill, header, section1-4 - with 3 window holes
       const notch = FLOOR_PLAN_CONFIG.balconyNotch;
       const westWallX = 0;  // West edge
       const westWallDepth = FLOOR_PLAN_CONFIG.apartmentDepth;  // 6.665
       const westWallThick = 0.08;
 
-      // Window parameters for west wall (reduced 10%)
+      // Window parameters for west wall
       const westNormalWidth = 0.7;  // Base window width
       const w5Width = westNormalWidth * 0.9;   // W5 = 0.63m (Bathroom, 0.9x normal)
       const w4Width = westNormalWidth * 1.125; // W4 = 0.7875m (Kitchen, 1.125x normal)
+      const w3Width = westNormalWidth * 2.0;   // W3 = 1.4m (Bedroom, 2x normal)
       const westSillHeight = 0.2;     // Bottom of windows (y=0 to 0.2)
       const westHeaderStart = 0.6;    // Top of window openings (y=0.6 to 0.8)
       const westMiddleHeight = westHeaderStart - westSillHeight;  // 0.4
 
-      // W5 window (Bathroom) - centered at z=0.6 (shifted further north)
+      // W5 window (Bathroom) - centered at z=0.6
       const w5CenterZ = 0.6;
-      const w5Left = w5CenterZ - w5Width / 2;   // 0.25
-      const w5Right = w5CenterZ + w5Width / 2;  // 0.95
+      const w5Left = w5CenterZ - w5Width / 2;
+      const w5Right = w5CenterZ + w5Width / 2;
 
-      // W4 window (Kitchen) - centered at z=2.3 (shifted further north)
+      // W4 window (Kitchen) - centered at z=2.3
       const w4CenterZ = 2.3;
-      const w4Left = w4CenterZ - w4Width / 2;   // 2.7805
-      const w4Right = w4CenterZ + w4Width / 2;  // 3.6555
+      const w4Left = w4CenterZ - w4Width / 2;
+      const w4Right = w4CenterZ + w4Width / 2;
+
+      // W3 window (Bedroom) - centered at z=5.5 (middle of bedroom)
+      const w3CenterZ = 5.5;
+      const w3Left = w3CenterZ - w3Width / 2;   // 4.8
+      const w3Right = w3CenterZ + w3Width / 2;  // 6.2
 
       // 1. SILL - full length bottom strip (y=0 to westSillHeight)
       const westSill = new THREE.Mesh(
@@ -394,8 +400,8 @@ export function networkView() {
       networkState.scene.add(westHeader);
       networkState.wallMeshes.push(westHeader);
 
-      // 3. SECTION 1 - from z=0 to W5 left (y=westSillHeight to westHeaderStart)
-      const westSec1Depth = w5Left;  // 1.137
+      // 3. SECTION 1 - from z=0 to W5 left
+      const westSec1Depth = w5Left;
       const westSection1 = new THREE.Mesh(
         new THREE.BoxGeometry(westWallThick, westMiddleHeight, westSec1Depth), wallMat
       );
@@ -403,8 +409,8 @@ export function networkView() {
       networkState.scene.add(westSection1);
       networkState.wallMeshes.push(westSection1);
 
-      // 4. SECTION 2 - from W5 right to W4 left (y=westSillHeight to westHeaderStart)
-      const westSec2Depth = w4Left - w5Right;  // 2.7805 - 1.837 = 0.9435
+      // 4. SECTION 2 - from W5 right to W4 left
+      const westSec2Depth = w4Left - w5Right;
       const westSection2 = new THREE.Mesh(
         new THREE.BoxGeometry(westWallThick, westMiddleHeight, westSec2Depth), wallMat
       );
@@ -412,8 +418,8 @@ export function networkView() {
       networkState.scene.add(westSection2);
       networkState.wallMeshes.push(westSection2);
 
-      // 5. SECTION 3 - from W4 right to wall end (y=westSillHeight to westHeaderStart)
-      const westSec3Depth = westWallDepth - w4Right;  // 6.665 - 3.6555 = 3.0095
+      // 5. SECTION 3 - from W4 right to W3 left
+      const westSec3Depth = w3Left - w4Right;
       const westSection3 = new THREE.Mesh(
         new THREE.BoxGeometry(westWallThick, westMiddleHeight, westSec3Depth), wallMat
       );
@@ -421,9 +427,17 @@ export function networkView() {
       networkState.scene.add(westSection3);
       networkState.wallMeshes.push(westSection3);
 
+      // 6. SECTION 4 - from W3 right to wall end
+      const westSec4Depth = westWallDepth - w3Right;
+      const westSection4 = new THREE.Mesh(
+        new THREE.BoxGeometry(westWallThick, westMiddleHeight, westSec4Depth), wallMat
+      );
+      westSection4.position.set(westWallX - centerX, westSillHeight + westMiddleHeight/2, w3Right + westSec4Depth/2 - centerZ);
+      networkState.scene.add(westSection4);
+      networkState.wallMeshes.push(westSection4);
+
       // Window openings (no mesh = holes):
-      // W5: z=1.137 to 1.837, y=0.2 to 0.6 (Bathroom)
-      // W4: z=2.7805 to 3.6555, y=0.2 to 0.6 (Kitchen)
+      // W5: Bathroom, W4: Kitchen, W3: Bedroom
 
       // Wall 10: East wall upper (Bathroom+Kitchen right consolidated)
       // Split into 3 segments with 2 door openings: bathroom (z=0.7) and kitchen (z=2.5)
