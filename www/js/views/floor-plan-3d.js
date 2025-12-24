@@ -7,6 +7,7 @@ import { interpolateColor, getRoomColor } from '../three/color-utils.js';
 import { applyDarkTheme, setWallsVisibility } from '../three/theme-utils.js';
 import { createScene, createRenderer, createOrbitCamera, addLighting, cleanupThreeState } from '../three/scene-init.js';
 import { createRoom as buildRoom } from '../three/room-builder.js';
+import { createStandardDoor, createFrenchDoor, createWindow as buildWindow, createBalconyRailing } from '../three/openings.js';
 
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const threeState = {
@@ -172,308 +173,25 @@ export function threeDView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS, Orbi
       return result.group;
     },
 
-    // Create door with handle and swing arc
     createDoor(doorConfig) {
-      const doorWidth = 0.9;
-      const doorHeight = FLOOR_PLAN_CONFIG.wallHeight * 0.85;
-      const posX = doorConfig.x - centerX;
-      const posZ = doorConfig.z - centerZ;
-
-      // Check door type
-      if (doorConfig.type === 'french') {
-        // French doors - double glass doors opening inward
-        this.createFrenchDoor(doorConfig, posX, posZ, doorWidth, doorHeight);
-        return;
-      }
-
-      // Standard door material (brown wood)
-      const doorMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8B4513,
-        roughness: 0.7,
-        metalness: 0.1
-      });
-
-      const door = new THREE.Mesh(
-        new THREE.BoxGeometry(doorWidth, doorHeight, 0.08),
-        doorMaterial
-      );
-      door.position.set(posX, doorHeight / 2, posZ);
-      door.rotation.y = doorConfig.rotation || 0;
-      door.castShadow = true;
-      threeState.scene.add(door);
-
-      // Door handle
-      const handleMaterial = new THREE.MeshStandardMaterial({
-        color: 0xC0C0C0,
-        metalness: 0.9,
-        roughness: 0.2
-      });
-      const handle = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.03, 0.03, 0.15, 16),
-        handleMaterial
-      );
-
-      // Position handle based on door rotation
-      const handleOffsetX = 0.3 * Math.cos(doorConfig.rotation || 0);
-      const handleOffsetZ = 0.3 * Math.sin(doorConfig.rotation || 0);
-      handle.position.set(
-        posX + handleOffsetX,
-        doorHeight * 0.45,
-        posZ + handleOffsetZ
-      );
-      handle.rotation.z = Math.PI / 2;
-      threeState.scene.add(handle);
-
-      // Add swing arc on floor
-      this.createSwingArc(doorConfig, posX, posZ, doorWidth);
-    },
-
-    // Create French doors (double glass doors)
-    createFrenchDoor(doorConfig, posX, posZ, doorWidth, doorHeight) {
-      const glassMaterial = new THREE.MeshStandardMaterial({
-        color: 0x87CEEB,
-        transparent: true,
-        opacity: 0.4,
-        roughness: 0.1,
-        metalness: 0.3
-      });
-
-      const frameMaterial = new THREE.MeshStandardMaterial({
-        color: 0x2c3e50,
-        roughness: 0.5,
-        metalness: 0.2
-      });
-
-      // Total width for double doors
-      const totalWidth = doorWidth * 2;
-      const gap = 0.05;  // Small gap between doors
-
-      // Left door panel
-      const leftDoor = new THREE.Mesh(
-        new THREE.BoxGeometry(doorWidth - gap/2, doorHeight, 0.06),
-        glassMaterial
-      );
-
-      // Right door panel
-      const rightDoor = new THREE.Mesh(
-        new THREE.BoxGeometry(doorWidth - gap/2, doorHeight, 0.06),
-        glassMaterial
-      );
-
-      // Position based on rotation
-      const rot = doorConfig.rotation || 0;
-      const offsetLeft = (doorWidth/2 + gap/4) * Math.cos(rot + Math.PI/2);
-      const offsetLeftZ = (doorWidth/2 + gap/4) * Math.sin(rot + Math.PI/2);
-      const offsetRight = (doorWidth/2 + gap/4) * Math.cos(rot - Math.PI/2);
-      const offsetRightZ = (doorWidth/2 + gap/4) * Math.sin(rot - Math.PI/2);
-
-      leftDoor.position.set(posX + offsetLeft, doorHeight/2, posZ + offsetLeftZ);
-      leftDoor.rotation.y = rot;
-      rightDoor.position.set(posX + offsetRight, doorHeight/2, posZ + offsetRightZ);
-      rightDoor.rotation.y = rot;
-
-      threeState.scene.add(leftDoor);
-      threeState.scene.add(rightDoor);
-
-      // Add door frames
-      const frameThickness = 0.05;
-
-      // Vertical frame divider in center
-      const centerFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(frameThickness, doorHeight, 0.08),
-        frameMaterial
-      );
-      centerFrame.position.set(posX, doorHeight/2, posZ);
-      centerFrame.rotation.y = rot;
-      threeState.scene.add(centerFrame);
-
-      // Add TWO swing arcs (one for each door, opening inward)
-      this.createSwingArc({ ...doorConfig, swingDirection: 'inward-left' }, posX + offsetLeft, posZ + offsetLeftZ, doorWidth);
-      this.createSwingArc({ ...doorConfig, swingDirection: 'inward-right' }, posX + offsetRight, posZ + offsetRightZ, doorWidth);
-    },
-
-    // Create swing arc on floor showing door opening direction
-    createSwingArc(doorConfig, posX, posZ, doorWidth) {
-      const arcRadius = doorWidth;
-      const arcSegments = 32;
-
-      // Determine arc angles based on swing direction
-      let startAngle, endAngle;
-      const rot = doorConfig.rotation || 0;
-      const swing = doorConfig.swingDirection || 'south';
-
-      if (swing === 'inward-left') {
-        startAngle = rot;
-        endAngle = rot + Math.PI/2;
-      } else if (swing === 'inward-right') {
-        startAngle = rot - Math.PI/2;
-        endAngle = rot;
-      } else if (swing === 'south') {
-        startAngle = rot;
-        endAngle = rot + Math.PI/2;
-      } else if (swing === 'north') {
-        startAngle = rot + Math.PI/2;
-        endAngle = rot + Math.PI;
-      } else if (swing === 'east') {
-        startAngle = rot - Math.PI/2;
-        endAngle = rot;
-      } else if (swing === 'west') {
-        startAngle = rot + Math.PI;
-        endAngle = rot + Math.PI * 1.5;
-      } else {
-        startAngle = rot;
-        endAngle = rot + Math.PI/2;
-      }
-
-      // Create arc curve
-      const curve = new THREE.EllipseCurve(
-        0, 0,           // center
-        arcRadius, arcRadius,  // xRadius, yRadius
-        startAngle, endAngle,  // start and end angles
-        false,          // clockwise
-        0               // rotation
-      );
-
-      const points = curve.getPoints(arcSegments);
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-      // Arc line material
-      const arcMaterial = new THREE.LineBasicMaterial({
-        color: 0x333333,
-        transparent: true,
-        opacity: 0.6
-      });
-
-      const arc = new THREE.Line(geometry, arcMaterial);
-      arc.rotation.x = -Math.PI / 2;  // Lay flat on floor
-      arc.position.set(posX, 0.02, posZ);  // Slightly above floor
-
-      threeState.scene.add(arc);
-    },
-
-    // Create window with glass pane
-    createWindow(winConfig) {
-      const winWidth = winConfig.size || 2.0;
-      const winHeight = 1.3;
       const wallHeight = FLOOR_PLAN_CONFIG.wallHeight;
-
-      // Window frame
-      const frameMaterial = new THREE.MeshStandardMaterial({
-        color: 0x2c3e50,
-        roughness: 0.5,
-        metalness: 0.2
-      });
-      const frame = new THREE.Mesh(
-        new THREE.BoxGeometry(winWidth, winHeight, 0.15),
-        frameMaterial
-      );
-      frame.position.set(
-        winConfig.x - centerX,
-        wallHeight * 0.55,
-        winConfig.z - centerZ
-      );
-      frame.rotation.y = winConfig.rotation || 0;
-      threeState.scene.add(frame);
-
-      // Window glass
-      const glassMaterial = new THREE.MeshStandardMaterial({
-        color: 0x87CEEB,
-        metalness: 0.3,
-        roughness: 0.1,
-        transparent: true,
-        opacity: 0.4
-      });
-      const glass = new THREE.Mesh(
-        new THREE.BoxGeometry(winWidth * 0.9, winHeight * 0.85, 0.06),
-        glassMaterial
-      );
-      glass.position.set(
-        winConfig.x - centerX,
-        wallHeight * 0.55,
-        winConfig.z - centerZ
-      );
-      glass.rotation.y = winConfig.rotation || 0;
-      threeState.scene.add(glass);
+      let meshes;
+      if (doorConfig.type === 'french') {
+        meshes = createFrenchDoor(doorConfig, centerX, centerZ, wallHeight);
+      } else {
+        meshes = createStandardDoor(doorConfig, centerX, centerZ, wallHeight);
+      }
+      meshes.forEach(m => threeState.scene.add(m));
     },
 
-    // Create balcony railing
+    createWindow(winConfig) {
+      const meshes = buildWindow(winConfig, centerX, centerZ, FLOOR_PLAN_CONFIG.wallHeight);
+      meshes.forEach(m => threeState.scene.add(m));
+    },
+
     createBalconyRailing() {
-      const bal = FLOOR_PLAN_CONFIG.balcony;
-      const railingHeight = 1.0;
-      const railingMaterial = new THREE.MeshStandardMaterial({
-        color: 0x374151,
-        metalness: 0.7,
-        roughness: 0.3
-      });
-
-      // Front railing (facing outward)
-      const frontRailing = new THREE.Mesh(
-        new THREE.BoxGeometry(bal.width, railingHeight, 0.05),
-        railingMaterial
-      );
-      frontRailing.position.set(
-        bal.x - centerX,
-        railingHeight / 2,
-        bal.z - centerZ + bal.depth / 2
-      );
-      threeState.scene.add(frontRailing);
-
-      // Left railing
-      const leftRailing = new THREE.Mesh(
-        new THREE.BoxGeometry(0.05, railingHeight, bal.depth),
-        railingMaterial
-      );
-      leftRailing.position.set(
-        bal.x - centerX - bal.width / 2,
-        railingHeight / 2,
-        bal.z - centerZ
-      );
-      threeState.scene.add(leftRailing);
-
-      // Vertical posts (glass panel supports)
-      const postMaterial = new THREE.MeshStandardMaterial({
-        color: 0x374151,
-        metalness: 0.8,
-        roughness: 0.2
-      });
-
-      const postPositions = [
-        { x: bal.x - bal.width / 2, z: bal.z + bal.depth / 2 },
-        { x: bal.x + bal.width / 2, z: bal.z + bal.depth / 2 },
-        { x: bal.x, z: bal.z + bal.depth / 2 }
-      ];
-
-      postPositions.forEach(pos => {
-        const post = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.03, 0.03, railingHeight, 8),
-          postMaterial
-        );
-        post.position.set(
-          pos.x - centerX,
-          railingHeight / 2,
-          pos.z - centerZ
-        );
-        threeState.scene.add(post);
-      });
-
-      // Glass panel for railing
-      const glassRailing = new THREE.MeshStandardMaterial({
-        color: 0xccf0ff,
-        transparent: true,
-        opacity: 0.3,
-        metalness: 0.2,
-        roughness: 0.1
-      });
-      const glassPanel = new THREE.Mesh(
-        new THREE.BoxGeometry(bal.width, railingHeight * 0.7, 0.02),
-        glassRailing
-      );
-      glassPanel.position.set(
-        bal.x - centerX,
-        railingHeight * 0.4,
-        bal.z - centerZ + bal.depth / 2
-      );
-      threeState.scene.add(glassPanel);
+      const meshes = createBalconyRailing(FLOOR_PLAN_CONFIG.balcony, centerX, centerZ);
+      meshes.forEach(m => threeState.scene.add(m));
     },
 
     // Create furniture
