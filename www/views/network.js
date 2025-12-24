@@ -595,74 +595,72 @@ export function networkView() {
       extFloor.position.set(extFloorX, 0.01, notchFloorZ);
       networkState.scene.add(extFloor);
 
-      // Wall 16: North balcony wall with French door opening
-      // Creates 3 pieces: header, left wall, right wall - with door hole in middle
-      const balconyWallZ = balconyStartZ;  // 5.165
-      const balconyWallWidth = notch.width * 2;  // 2.0m
-      const balconyWallThick = 0.08;
-      const wall16CenterX = FLOOR_PLAN_CONFIG.apartmentWidth - centerX;  // Centered at building edge
+      // Wall 16: North balcony wall (solid - no door here)
+      const northBalconyWall = new THREE.Mesh(
+        new THREE.BoxGeometry(notch.width * 2, wallHeight, 0.08),
+        wallMat
+      );
+      const wall16CenterX = FLOOR_PLAN_CONFIG.apartmentWidth - centerX;
+      northBalconyWall.position.set(wall16CenterX, wallHeight / 2, balconyStartZ - centerZ);
+      networkState.scene.add(northBalconyWall);
+      networkState.wallMeshes.push(northBalconyWall);
 
-      // French door parameters
-      const frenchDoorCenterX = FLOOR_PLAN_CONFIG.apartmentWidth;  // 9.239
-      const frenchDoorWidth = 1.2;  // 1.2m door opening
-      const frenchDoorLeft = frenchDoorCenterX - frenchDoorWidth / 2;   // 8.639
-      const frenchDoorRight = frenchDoorCenterX + frenchDoorWidth / 2;  // 9.839
+      // Wall 17: West notch wall with French door opening (x=8.239, z=5.165 to 6.665)
+      // Creates 3 pieces: header, front wall, back wall - with door hole in middle
+      const vertStepWallX = (FLOOR_PLAN_CONFIG.apartmentWidth - notch.width) - centerX;  // 8.239 - centerX
+      const westNotchWallThick = 0.08;
+
+      // French door parameters for west notch wall
+      const frenchDoorCenterZ = FLOOR_PLAN_CONFIG.apartmentDepth - notch.depth / 2;  // 5.915 (center of notch)
+      const frenchDoorWidth = 1.0;  // 1.0m door opening
+      const frenchDoorFront = frenchDoorCenterZ - frenchDoorWidth / 2;   // 5.415
+      const frenchDoorBack = frenchDoorCenterZ + frenchDoorWidth / 2;    // 6.415
       const frenchDoorHeight = 0.7;  // Door opening height (floor to header)
       const frenchHeaderHeight = wallHeight - frenchDoorHeight;  // 0.1m header
 
-      // Wall start/end X positions
-      const balconyWallStartX = FLOOR_PLAN_CONFIG.apartmentWidth - notch.width;  // 8.239
-      const balconyWallEndX = FLOOR_PLAN_CONFIG.apartmentWidth + notch.width;    // 10.239
+      // Wall Z positions (z=5.165 to z=6.665)
+      const westNotchStartZ = balconyStartZ;  // 5.165
+      const westNotchEndZ = FLOOR_PLAN_CONFIG.apartmentDepth;  // 6.665
 
-      // 1. HEADER - full width top strip (y=frenchDoorHeight to wallHeight)
-      const balconyHeader = new THREE.Mesh(
-        new THREE.BoxGeometry(balconyWallWidth, frenchHeaderHeight, balconyWallThick), wallMat
+      // 1. HEADER - full depth top strip (y=frenchDoorHeight to wallHeight)
+      const westNotchHeader = new THREE.Mesh(
+        new THREE.BoxGeometry(westNotchWallThick, frenchHeaderHeight, notch.depth), wallMat
       );
-      balconyHeader.position.set(
-        wall16CenterX,
+      westNotchHeader.position.set(
+        vertStepWallX,
         frenchDoorHeight + frenchHeaderHeight/2,
-        balconyWallZ - centerZ
+        (FLOOR_PLAN_CONFIG.apartmentDepth - notch.depth / 2) - centerZ
       );
-      networkState.scene.add(balconyHeader);
-      networkState.wallMeshes.push(balconyHeader);
+      networkState.scene.add(westNotchHeader);
+      networkState.wallMeshes.push(westNotchHeader);
 
-      // 2. LEFT WALL - from wall start to door left (y=0 to frenchDoorHeight)
-      const frenchLeftWallWidth = frenchDoorLeft - balconyWallStartX;  // 0.4m
-      const balconyLeftWall = new THREE.Mesh(
-        new THREE.BoxGeometry(frenchLeftWallWidth, frenchDoorHeight, balconyWallThick), wallMat
+      // 2. FRONT WALL - from notch start to door front (y=0 to frenchDoorHeight)
+      const frontWallDepth = frenchDoorFront - westNotchStartZ;  // 0.25m
+      const westNotchFrontWall = new THREE.Mesh(
+        new THREE.BoxGeometry(westNotchWallThick, frenchDoorHeight, frontWallDepth), wallMat
       );
-      balconyLeftWall.position.set(
-        balconyWallStartX + frenchLeftWallWidth/2 - centerX,
+      westNotchFrontWall.position.set(
+        vertStepWallX,
         frenchDoorHeight/2,
-        balconyWallZ - centerZ
+        westNotchStartZ + frontWallDepth/2 - centerZ
       );
-      networkState.scene.add(balconyLeftWall);
-      networkState.wallMeshes.push(balconyLeftWall);
+      networkState.scene.add(westNotchFrontWall);
+      networkState.wallMeshes.push(westNotchFrontWall);
 
-      // 3. RIGHT WALL - from door right to wall end (y=0 to frenchDoorHeight)
-      const frenchRightWallWidth = balconyWallEndX - frenchDoorRight;  // 0.4m
-      const balconyRightWall = new THREE.Mesh(
-        new THREE.BoxGeometry(frenchRightWallWidth, frenchDoorHeight, balconyWallThick), wallMat
+      // 3. BACK WALL - from door back to notch end (y=0 to frenchDoorHeight)
+      const backWallDepth = westNotchEndZ - frenchDoorBack;  // 0.25m
+      const westNotchBackWall = new THREE.Mesh(
+        new THREE.BoxGeometry(westNotchWallThick, frenchDoorHeight, backWallDepth), wallMat
       );
-      balconyRightWall.position.set(
-        frenchDoorRight + frenchRightWallWidth/2 - centerX,
+      westNotchBackWall.position.set(
+        vertStepWallX,
         frenchDoorHeight/2,
-        balconyWallZ - centerZ
+        frenchDoorBack + backWallDepth/2 - centerZ
       );
-      networkState.scene.add(balconyRightWall);
-      networkState.wallMeshes.push(balconyRightWall);
+      networkState.scene.add(westNotchBackWall);
+      networkState.wallMeshes.push(westNotchBackWall);
 
-      // French door opening at x=8.639 to 9.839, y=0 to 0.7 (no mesh = hole)
-
-      // Wall 17: West notch wall (along x = 8.239, from z=5.165 to z=6.665)
-      const vertStepWallX = (FLOOR_PLAN_CONFIG.apartmentWidth - notch.width) - centerX;
-      const westNotchWall = new THREE.Mesh(
-        new THREE.BoxGeometry(0.08, wallHeight, notch.depth),
-        wallMat
-      );
-      westNotchWall.position.set(vertStepWallX, wallHeight / 2, notchFloorZ);
-      networkState.scene.add(westNotchWall);
-      networkState.wallMeshes.push(westNotchWall);
+      // French door opening at z=5.415 to 6.415, y=0 to 0.7 (no mesh = hole)
 
       // Balcony railings (if enabled) - same color as walls
       if (notch.hasRailing) {
