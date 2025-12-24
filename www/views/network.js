@@ -400,19 +400,29 @@ export function networkView() {
       networkState.scene.add(eastWallUpper3);
       networkState.wallMeshes.push(eastWallUpper3);
 
-      // Wall 14: East wall lower with W2 window cut (proper frame, not door gap)
-      // Creates 4 pieces: sill, header, left wall, right wall - with window hole in middle
+      // Wall 14: East wall lower with W1 + W2 window cuts (proper frame)
+      // Creates 5 pieces: sill, header, section1, section2, section3 - with 2 window holes
       const wall9X = FLOOR_PLAN_CONFIG.apartmentWidth;  // 9.239 (east edge)
       const eastWallEndZ = FLOOR_PLAN_CONFIG.apartmentDepth - notch.depth;  // 5.165
       const wallThick = 0.08;
 
-      // Window cut parameters (0.7m opening centered at z=4.2, reduced 30% from 1.0m)
-      const winCenterZ = 4.2;
-      const winWidth = 0.7;
-      const winLeft = winCenterZ - winWidth / 2;   // 3.85 (north edge)
-      const winRight = winCenterZ + winWidth / 2;  // 4.55 (south edge)
-      const sillHeight = 0.2;     // Bottom of window (y=0 to 0.2)
-      const headerStart = 0.6;    // Top of window opening (y=0.6 to 0.8)
+      // Window parameters (different sizes for W1 and W2)
+      const normalWidth = 0.7;  // Base window width
+      const w1Width = normalWidth * 2.3;  // W1 = 1.61m (2.3x normal)
+      const w2Width = normalWidth * 1.25; // W2 = 0.875m (1.25x normal)
+      const sillHeight = 0.2;     // Bottom of windows (y=0 to 0.2)
+      const headerStart = 0.6;    // Top of window openings (y=0.6 to 0.8)
+      const middleHeight = headerStart - sillHeight;  // 0.4
+
+      // W1 window (Study) - centered at z=1.5, width 1.61m (shifted north)
+      const w1CenterZ = 1.5;
+      const w1Left = w1CenterZ - w1Width / 2;   // 1.043
+      const w1Right = w1CenterZ + w1Width / 2;  // 2.653
+
+      // W2 window (Living) - centered at z=4.2, width 0.875m
+      const w2CenterZ = 4.2;
+      const w2Left = w2CenterZ - w2Width / 2;   // 3.7625
+      const w2Right = w2CenterZ + w2Width / 2;  // 4.6375
 
       // 1. SILL - full length bottom strip (y=0 to sillHeight)
       const sill = new THREE.Mesh(
@@ -431,26 +441,36 @@ export function networkView() {
       networkState.scene.add(header);
       networkState.wallMeshes.push(header);
 
-      // 3. LEFT WALL - from z=0 to window left (y=sillHeight to headerStart)
-      const leftDepth = winLeft;  // 3.7
-      const middleHeight = headerStart - sillHeight;  // 0.4
-      const leftWall = new THREE.Mesh(
-        new THREE.BoxGeometry(wallThick, middleHeight, leftDepth), wallMat
+      // 3. SECTION 1 - from z=0 to W1 left (y=sillHeight to headerStart)
+      const sec1Depth = w1Left;  // 1.498
+      const section1 = new THREE.Mesh(
+        new THREE.BoxGeometry(wallThick, middleHeight, sec1Depth), wallMat
       );
-      leftWall.position.set(wall9X - centerX, sillHeight + middleHeight/2, leftDepth/2 - centerZ);
-      networkState.scene.add(leftWall);
-      networkState.wallMeshes.push(leftWall);
+      section1.position.set(wall9X - centerX, sillHeight + middleHeight/2, sec1Depth/2 - centerZ);
+      networkState.scene.add(section1);
+      networkState.wallMeshes.push(section1);
 
-      // 4. RIGHT WALL - from window right to wall end (y=sillHeight to headerStart)
-      const rightDepth = eastWallEndZ - winRight;  // 0.465
-      const rightWall = new THREE.Mesh(
-        new THREE.BoxGeometry(wallThick, middleHeight, rightDepth), wallMat
+      // 4. SECTION 2 - from W1 right to W2 left (y=sillHeight to headerStart)
+      const sec2Depth = w2Left - w1Right;  // 3.85 - 2.198 = 1.652
+      const section2 = new THREE.Mesh(
+        new THREE.BoxGeometry(wallThick, middleHeight, sec2Depth), wallMat
       );
-      rightWall.position.set(wall9X - centerX, sillHeight + middleHeight/2, winRight + rightDepth/2 - centerZ);
-      networkState.scene.add(rightWall);
-      networkState.wallMeshes.push(rightWall);
+      section2.position.set(wall9X - centerX, sillHeight + middleHeight/2, w1Right + sec2Depth/2 - centerZ);
+      networkState.scene.add(section2);
+      networkState.wallMeshes.push(section2);
 
-      // Window opening is at z=3.7 to 4.7, y=0.2 to 0.6 (no mesh = hole)
+      // 5. SECTION 3 - from W2 right to wall end (y=sillHeight to headerStart)
+      const sec3Depth = eastWallEndZ - w2Right;  // 5.165 - 4.55 = 0.615
+      const section3 = new THREE.Mesh(
+        new THREE.BoxGeometry(wallThick, middleHeight, sec3Depth), wallMat
+      );
+      section3.position.set(wall9X - centerX, sillHeight + middleHeight/2, w2Right + sec3Depth/2 - centerZ);
+      networkState.scene.add(section3);
+      networkState.wallMeshes.push(section3);
+
+      // Window openings (no mesh = holes):
+      // W1: z=1.498 to 2.198, y=0.2 to 0.6 (Study)
+      // W2: z=3.85 to 4.55, y=0.2 to 0.6 (Living)
 
       // Wall 10: South wall (gap on EAST side for balcony notch)
       const southWallZ = FLOOR_PLAN_CONFIG.apartmentDepth;  // 6.665
