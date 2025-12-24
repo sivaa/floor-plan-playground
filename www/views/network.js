@@ -359,10 +359,10 @@ export function networkView() {
       const westWallDepth = FLOOR_PLAN_CONFIG.apartmentDepth;  // 6.665
       const westWallThick = 0.08;
 
-      // Window parameters for west wall
+      // Window parameters for west wall (reduced 10%)
       const westNormalWidth = 0.7;  // Base window width
-      const w5Width = westNormalWidth * 1.0;   // W5 = 0.7m (Bathroom, 1x normal)
-      const w4Width = westNormalWidth * 1.25;  // W4 = 0.875m (Kitchen, 1.25x normal)
+      const w5Width = westNormalWidth * 0.9;   // W5 = 0.63m (Bathroom, 0.9x normal)
+      const w4Width = westNormalWidth * 1.125; // W4 = 0.7875m (Kitchen, 1.125x normal)
       const westSillHeight = 0.2;     // Bottom of windows (y=0 to 0.2)
       const westHeaderStart = 0.6;    // Top of window openings (y=0.6 to 0.8)
       const westMiddleHeight = westHeaderStart - westSillHeight;  // 0.4
