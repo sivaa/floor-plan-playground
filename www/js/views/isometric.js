@@ -7,6 +7,7 @@
 import { interpolateColor, getRoomColor } from '../three/color-utils.js';
 import { applyDarkTheme, setWallsVisibility } from '../three/theme-utils.js';
 import { createScene, createRenderer, createOrthographicCamera, addLighting, cleanupThreeState } from '../three/scene-init.js';
+import { createRoom as buildRoom } from '../three/room-builder.js';
 
 // Store Three.js objects OUTSIDE Alpine to avoid proxy conflicts
 const isoState = {
@@ -164,81 +165,9 @@ export function isometricView(FLOOR_PLAN_CONFIG, TEMP_COLORS, HUMIDITY_COLORS) {
     },
 
     createRoom(config) {
-      const group = new THREE.Group();
-      const wallHeight = FLOOR_PLAN_CONFIG.wallHeight;
-
-      // Room floor - colored transparent box
-      const floorGeometry = new THREE.BoxGeometry(config.width, 0.05, config.depth);
-      const floorMaterial = new THREE.MeshStandardMaterial({
-        color: config.color,
-        transparent: true,
-        opacity: 0.3,
-        roughness: 0.6,
-        metalness: 0.1
-      });
-      const roomFloor = new THREE.Mesh(floorGeometry, floorMaterial);
-      roomFloor.position.set(config.x - centerX, 0.025, config.z - centerZ);
-      roomFloor.receiveShadow = true;
-      roomFloor.name = 'floor_' + config.id;
-      group.add(roomFloor);
-
-      // Glassy wall material
-      const wallMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.25,
-        metalness: 0.4,
-        roughness: 0.08,
-        side: THREE.DoubleSide
-      });
-
-      // Calculate room boundaries
-      const halfW = config.width / 2;
-      const halfD = config.depth / 2;
-      const rx = config.x - centerX;
-      const rz = config.z - centerZ;
-
-      // Back wall (north)
-      const backWall = new THREE.Mesh(
-        new THREE.BoxGeometry(config.width, wallHeight, 0.15),
-        wallMaterial
-      );
-      backWall.position.set(rx, wallHeight/2, rz - halfD);
-      backWall.castShadow = true;
-      group.add(backWall);
-      isoState.wallMeshes.push(backWall);
-
-      // Front wall (south)
-      const frontWall = new THREE.Mesh(
-        new THREE.BoxGeometry(config.width, wallHeight, 0.15),
-        wallMaterial
-      );
-      frontWall.position.set(rx, wallHeight/2, rz + halfD);
-      frontWall.castShadow = true;
-      group.add(frontWall);
-      isoState.wallMeshes.push(frontWall);
-
-      // Left wall (west)
-      const leftWall = new THREE.Mesh(
-        new THREE.BoxGeometry(0.15, wallHeight, config.depth),
-        wallMaterial
-      );
-      leftWall.position.set(rx - halfW, wallHeight/2, rz);
-      leftWall.castShadow = true;
-      group.add(leftWall);
-      isoState.wallMeshes.push(leftWall);
-
-      // Right wall (east)
-      const rightWall = new THREE.Mesh(
-        new THREE.BoxGeometry(0.15, wallHeight, config.depth),
-        wallMaterial
-      );
-      rightWall.position.set(rx + halfW, wallHeight/2, rz);
-      rightWall.castShadow = true;
-      group.add(rightWall);
-      isoState.wallMeshes.push(rightWall);
-
-      return group;
+      const result = buildRoom(config, centerX, centerZ, FLOOR_PLAN_CONFIG.wallHeight);
+      result.walls.forEach(wall => isoState.wallMeshes.push(wall));
+      return result.group;
     },
 
     createDoor(doorConfig) {
