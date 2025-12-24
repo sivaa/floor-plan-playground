@@ -1049,8 +1049,8 @@ export function networkView() {
         }
       }
 
-      // Furniture
-      this.createFurniture(group, config, rx, rz);
+      // Furniture (disabled)
+      // this.createFurniture(group, config, rx, rz);
 
       networkState.scene.add(group);
       networkState.roomMeshes[config.id] = { group, floor, config };
