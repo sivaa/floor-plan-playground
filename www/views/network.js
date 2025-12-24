@@ -5,6 +5,8 @@
 
 import { ZIGBEE_DEVICES } from '../js/data/zigbee-devices.js';
 import { FLOOR_PLAN_CONFIG } from '../js/config.js';
+import { createNumberSprite } from '../js/three/sprite-factory.js';
+import { createRadiatorMaterial, createTrvzbBodyMaterial, createLedMaterial } from '../js/three/radiator-materials.js';
 
 // Persistent state across view switches
 const networkState = {
@@ -126,26 +128,7 @@ export function networkView() {
       networkState.wallNumberSprites = [];
 
       // Add number labels at start, middle, end of each wall for precise identification
-      const createNumberSprite = (text, color = '#FF0000') => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(32, 32, 28, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 28px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(String(text), 32, 32);
-        const texture = new THREE.CanvasTexture(canvas);
-        const spriteMat = new THREE.SpriteMaterial({ map: texture });
-        const sprite = new THREE.Sprite(spriteMat);
-        sprite.scale.set(0.4, 0.4, 1);
-        return sprite;
-      };
+      // (createNumberSprite imported from sprite-factory.js)
 
       // Direction labels by POSITION (reliable regardless of wall creation order)
       // Outer walls are identified by: edge position + full length
@@ -712,11 +695,7 @@ export function networkView() {
       // ═══════════════════════════════════════════════════════════════
 
       // Main radiator material - blends perfectly with room
-      const radiatorMat = new THREE.MeshStandardMaterial({
-        color: 0xC9B89A,    // Exact floor color for seamless blend
-        metalness: 0.15,
-        roughness: 0.75
-      });
+      const radiatorMat = createRadiatorMaterial();
 
       // Bedroom radiator - below W3 window (west wall, z=4.7)
       const radHeight = 0.30;
@@ -778,9 +757,7 @@ export function networkView() {
       const trvzbBaseY = radBaseY + radHeight;
 
       // Valve body (white cylinder)
-      const trvzbBodyMat = new THREE.MeshStandardMaterial({
-        color: 0xF5F5F0, metalness: 0.1, roughness: 0.6
-      });
+      const trvzbBodyMat = createTrvzbBodyMaterial();
       const trvzbBody = new THREE.Mesh(
         new THREE.CylinderGeometry(0.015, 0.018, 0.04, 24),
         trvzbBodyMat
@@ -797,9 +774,7 @@ export function networkView() {
       networkState.scene.add(trvzbConnector);
 
       // Orange LED indicator (glowing)
-      const ledMat = new THREE.MeshStandardMaterial({
-        color: 0xFF8C00, emissive: 0xFF6B00, emissiveIntensity: 0.8
-      });
+      const ledMat = createLedMaterial();
       const led = new THREE.Mesh(
         new THREE.SphereGeometry(0.004, 16, 16),
         ledMat
@@ -1087,6 +1062,60 @@ export function networkView() {
       );
       livingDivLed.position.set(livingDivTrvzbX, trvzbBaseY + 0.035, livingDivTrvzbZ + 0.012);
       networkState.scene.add(livingDivLed);
+
+      // ═══════════════════════════════════════════════════════════════
+      // SONOFF Temperature & Humidity Sensor (SNZB-02D)
+      // Floor-standing at junction of south wall and bedroom-living divider
+      // Inside living room (east side of divider)
+      // ═══════════════════════════════════════════════════════════════
+
+      // Position: West side of living room, near divider wall
+      // Divider wall at x=4.489, moved north to be visible from camera
+      const dividerX = 2.2445 + 4.489/2;  // = 4.489
+      const sensorX = dividerX + 0.5 - centerX;  // 50cm into living room from divider
+      const sensorZ = FLOOR_PLAN_CONFIG.apartmentDepth - 1.2 - centerZ;  // 1.2m from south wall (visible)
+      const sensorY = 0.25;  // Raised off floor
+
+      // Main sensor body - LARGE white cube for visibility
+      const sensorMat = new THREE.MeshStandardMaterial({
+        color: 0xFFFFFF,
+        metalness: 0.1,
+        roughness: 0.4,
+        emissive: 0xFFFFFF,
+        emissiveIntensity: 0.3
+      });
+      const sensorBody = new THREE.Mesh(
+        new THREE.BoxGeometry(0.25, 0.30, 0.15),  // 25cm x 30cm x 15cm - LARGE
+        sensorMat
+      );
+      sensorBody.position.set(sensorX, sensorY, sensorZ);
+      networkState.scene.add(sensorBody);
+
+      // LCD display (dark with cyan glow)
+      const displayMat = new THREE.MeshStandardMaterial({
+        color: 0x001133,
+        emissive: 0x00FFFF,
+        emissiveIntensity: 1.0
+      });
+      const sensorDisplay = new THREE.Mesh(
+        new THREE.BoxGeometry(0.26, 0.18, 0.08),
+        displayMat
+      );
+      sensorDisplay.position.set(sensorX, sensorY + 0.03, sensorZ);
+      networkState.scene.add(sensorDisplay);
+
+      // Bright green LED on top
+      const sonoffLedMat = new THREE.MeshStandardMaterial({
+        color: 0x00FF00,
+        emissive: 0x00FF00,
+        emissiveIntensity: 2.0
+      });
+      const sensorLed = new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 16, 16),
+        sonoffLedMat
+      );
+      sensorLed.position.set(sensorX, sensorY + 0.20, sensorZ);
+      networkState.scene.add(sensorLed);
 
       // ═══════════════════════════════════════════════════════════════
       // WINDOW X MARKERS - Blue X on floor (like door markers but blue)
