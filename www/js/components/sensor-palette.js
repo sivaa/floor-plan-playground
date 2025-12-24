@@ -3,7 +3,7 @@
  * Displays list of sensors for drag-drop configuration
  */
 
-import { SENSOR_VISUALS } from '../js/config.js';
+import { SENSOR_VISUALS } from '../config.js';
 
 /**
  * Sensor palette Alpine component

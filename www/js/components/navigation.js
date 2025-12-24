@@ -8,7 +8,7 @@ import {
   PRIMARY_VIEWS,
   OVERFLOW_CATEGORIES,
   KEYBOARD_SHORTCUTS
-} from '../js/config.js';
+} from '../config.js';
 
 /**
  * Navigation Alpine.js component
