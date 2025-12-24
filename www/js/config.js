@@ -234,13 +234,7 @@ export const FLOOR_PLAN_CONFIG = {
     floorColor: 0xC9B89A  // Warm beige (same as room floors)
   },
   doors: [
-    { x: 9.239, z: 6.465, rotation: Math.PI/2, type: 'french', swingDirection: 'inward' },  // Balcony ↔ Living (double glass French doors at east wall)
-    { x: 3.706, z: 3.697, rotation: 0, swingDirection: 'south' },           // Living ↔ Hallway
-    { x: 4.354, z: 1.848, rotation: Math.PI/2, swingDirection: 'east' },    // Study ↔ Hallway
-    { x: 3.134, z: 3.697, rotation: 0, swingDirection: 'south' },           // Bedroom ↔ Hallway
-    { x: 3.331, z: 2.818, rotation: Math.PI/2, swingDirection: 'east' },    // Hallway ↔ Kitchen
-    { x: 3.331, z: 1.338, rotation: Math.PI/2, swingDirection: 'east' },    // Hallway ↔ Bathroom
-    { x: 0, z: 4.8, rotation: Math.PI/2, type: 'entry', swingDirection: 'east' }  // Main entry door (west wall in mirrored layout)
+    // All door markers removed - door openings still exist in walls
   ],
   windows: [
     // All window markers removed - window openings still exist in walls
